@@ -92,6 +92,7 @@ textarea.in{resize:vertical;min-height:48px}
 .pc{background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:.75rem}
 .pc.new{border-color:var(--gold-b);background:var(--gold-d)}
 .pc.merge{border-color:rgba(90,170,122,.3);background:var(--green-d)}
+.pc.excluded{opacity:.35}
 .pc-top{display:flex;justify-content:space-between;gap:6px;margin-bottom:4px}
 .pc-n{font-size:12px;font-weight:600}
 .pt{font-size:8px;font-weight:700;padding:2px 6px;border-radius:20px;text-transform:uppercase;flex-shrink:0}
@@ -154,15 +155,6 @@ textarea.in{resize:vertical;min-height:48px}
 .pp-r{display:flex;gap:.375rem;font-size:11px;margin-bottom:.375rem}
 .pp-k{color:var(--text3);min-width:54px}.pp-v{color:var(--text2)}
 .chip{display:inline-block;padding:2px 7px;border-radius:20px;font-size:10px;background:var(--surface2);color:var(--text2);border:1px solid var(--border);margin:2px 2px 0 0}
-.pp-in{width:100%;background:var(--surface2);border:1px solid var(--border-s);border-radius:6px;color:var(--text);font-size:11px;padding:5px 8px;outline:none;margin-bottom:5px}
-.pp-in:focus{border-color:var(--gold)}
-.relrow{display:flex;gap:4px;align-items:center;margin-bottom:4px}
-.relrow .rn{flex:1;font-size:11px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.relsel{background:var(--surface2);border:1px solid var(--border-s);border-radius:6px;color:var(--text);font-size:10px;padding:3px 5px;outline:none;max-width:96px}
-.rx{cursor:pointer;color:var(--text3);font-size:13px;padding:0 4px;border:none;background:none;line-height:1}
-.rx:hover{color:var(--red)}
-.gen-band{stroke:rgba(255,255,255,.05);stroke-width:1}
-.gen-lbl{fill:rgba(255,255,255,.22);font-size:9px;text-transform:uppercase;letter-spacing:.08em;pointer-events:none}
 
 .empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3.5rem 2rem;color:var(--text3);gap:.5rem;text-align:center}
 .ei{font-size:34px;opacity:.3}
@@ -332,8 +324,6 @@ textarea.in{resize:vertical;min-height:48px}
           <div class="card"><div class="card-b">
             <div class="card-t">Database</div>
             <div style="font-size:12px;color:var(--text2)" id="db-status">Checking…</div>
-            <div style="margin-top:.625rem"><button class="btn btn-s" style="color:var(--red)" onclick="wipeAll()">Clear entire tree</button>
-            <span style="font-size:11px;color:var(--text3);margin-left:.5rem">Removes all people + links. Use to restart clean.</span></div>
           </div></div>
         </div>
       </div>
@@ -378,10 +368,10 @@ textarea.in{resize:vertical;min-height:48px}
 //  ⚙️  CONFIG — paste your Supabase details here, then re-deploy
 // ════════════════════════════════════════════════════════════════
 const CONFIG = {
-  SUPABASE_URL:  'https://njpvyqbmfhpzrpypoaaz.supabase.co',
-  SUPABASE_KEY:  'sb_publishable_YbsqWeQKad1Ry-PCAdhcTA_1BsZEV10',
-  TREE_NAME:     'Tiwari Family',          // header label — change freely
-  ROOT_PERSON:   'Satyam Tiwari',          // MUST match your name as entered in the tree (gold "you" node)
+  SUPABASE_URL:  'PASTE_SUPABASE_URL',       // e.g. https://abcd.supabase.co
+  SUPABASE_KEY:  'PASTE_SUPABASE_ANON_KEY',  // the "anon public" key
+  TREE_NAME:     'Tiwari Family',            // shown in the header
+  ROOT_PERSON:   'Satyam',                   // who counts as "you" (gold node)
 };
 // ════════════════════════════════════════════════════════════════
 
@@ -399,7 +389,7 @@ const QUESTIONS = [
 
 let STATE = { people:{}, rels:[], invites:[], pending:[], demo:false,
   aiProvider:'groq', aiKey:'', aiModel:'' };
-let sim, zoom, parseResult=null, respInvite=null, lastTransform=null;
+let sim, zoom, parseResult=null, respInvite=null;
 
 const configured = () => CONFIG.SUPABASE_URL.startsWith('http') && CONFIG.SUPABASE_KEY.length>20;
 
@@ -486,240 +476,127 @@ function renderSide(filter=''){
 }
 function filterSide(v){ renderSide(v); }
 
-// ── D3 tree ──
-// ───────────────────────────────────────────────────────────
-//  DETERMINISTIC GENEALOGICAL LAYOUT
-// ───────────────────────────────────────────────────────────
-function avg(a){ return a.length ? a.reduce((s,v)=>s+v,0)/a.length : 0; }
-function median(a){ if(!a.length)return null; const s=[...a].sort((x,y)=>x-y); const m=s.length>>1; return s.length%2?s[m]:(s[m-1]+s[m])/2; }
-
-// generation level for everyone — propagates through parents(+1) AND spouses/siblings(=0)
-function computeGenerations(people, idset){
-  const adj={}; people.forEach(p=>adj[p.id]=[]);
-  STATE.rels.forEach(r=>{ if(!idset.has(r.from_id)||!idset.has(r.to_id))return; const t=(r.type||'').toUpperCase();
-    if(t.includes('GRAND')){ adj[r.from_id].push([r.to_id,2]); adj[r.to_id].push([r.from_id,-2]); }
-    else if(t.includes('PARENT')){ adj[r.from_id].push([r.to_id,1]); adj[r.to_id].push([r.from_id,-1]); }
-    else if(t.includes('CHILD')){ adj[r.from_id].push([r.to_id,-1]); adj[r.to_id].push([r.from_id,1]); }
-    else if(t.includes('SPOUSE')||t.includes('SIBLING')){ adj[r.from_id].push([r.to_id,0]); adj[r.to_id].push([r.from_id,0]); }
+// ── generational layout ──
+function genDelta(type){
+  const t=(type||'').toUpperCase();
+  if(t.includes('GRANDPARENT')) return 2;
+  if(t.includes('PARENT')) return 1;     // PARENT_OF: from=parent, to=child
+  if(t.includes('CHILD')) return -1;     // CHILD_OF: from=child, to=parent
+  if(t.includes('UNCLE')||t.includes('AUNT')) return 1; // from=uncle/aunt, to=niece/nephew
+  return 0; // SIBLING_OF, SPOUSE_OF, COUSIN_OF, OTHER — same generation
+}
+function computeLayout(){
+  const people=Object.values(STATE.people); const ids=people.map(p=>p.id);
+  const root=people.find(p=>norm(p.full_name)===norm(CONFIG.ROOT_PERSON))||people[0];
+  const gen={}; const queue=[];
+  if(root){ gen[root.id]=0; queue.push(root.id); }
+  while(queue.length){
+    const cur=queue.shift();
+    STATE.rels.forEach(r=>{
+      if(r.from_id===cur && STATE.people[r.to_id] && !(r.to_id in gen)){ gen[r.to_id]=gen[cur]+genDelta(r.type); queue.push(r.to_id); }
+      if(r.to_id===cur && STATE.people[r.from_id] && !(r.from_id in gen)){ gen[r.from_id]=gen[cur]-genDelta(r.type); queue.push(r.from_id); }
+    });
+  }
+  ids.forEach(id=>{ if(!(id in gen)) gen[id]=0; });
+  const levels={}; ids.forEach(id=>{ (levels[gen[id]]=levels[gen[id]]||[]).push(id); });
+  const spacingX=108, spacingY=128, posX={};
+  Object.keys(levels).map(Number).sort((a,b)=>a-b).forEach(level=>{
+    const nodeIds=levels[level];
+    const anchored=nodeIds.map(id=>{
+      const up=STATE.rels.filter(r=>r.to_id===id && gen[r.from_id]===level-1 && genDelta(r.type)>0 && posX[r.from_id]!==undefined);
+      const anchor=up.length? up.reduce((s,r)=>s+posX[r.from_id],0)/up.length : null;
+      return {id,anchor};
+    });
+    anchored.sort((a,b)=>{
+      if(a.anchor==null&&b.anchor==null) return (STATE.people[a.id].full_name||'').localeCompare(STATE.people[b.id].full_name||'');
+      if(a.anchor==null) return 1; if(b.anchor==null) return -1; return a.anchor-b.anchor;
+    });
+    for(let i=0;i<anchored.length-1;i++){
+      const sp=STATE.rels.find(r=>(r.from_id===anchored[i].id||r.to_id===anchored[i].id)&&(r.type||'').toUpperCase().includes('SPOUSE'));
+      if(sp){ const sId=sp.from_id===anchored[i].id?sp.to_id:sp.from_id; const j=anchored.findIndex(x=>x.id===sId);
+        if(j>i+1){ const [it]=anchored.splice(j,1); anchored.splice(i+1,0,it); } }
+    }
+    const n=anchored.length; anchored.forEach((a,i)=>{ posX[a.id]=(i-(n-1)/2)*spacingX; });
   });
-  const gen={};
-  people.forEach(seed=>{ if(gen[seed.id]!=null)return; gen[seed.id]=0; const q=[seed.id];
-    while(q.length){ const u=q.shift(); adj[u].forEach(([to,off])=>{ if(gen[to]==null){ gen[to]=gen[u]+off; q.push(to); } }); } });
-  const mn=Math.min(0,...Object.values(gen)); Object.keys(gen).forEach(k=>gen[k]-=mn);
-  return gen;
+  const pos={}; ids.forEach(id=>{ pos[id]={x:posX[id]||0,y:gen[id]*spacingY}; }); return pos;
 }
 
-function layoutTree(people){
-  const idset=new Set(people.map(p=>p.id));
-  const gen=computeGenerations(people, idset);
-  const childrenOf={}, parentsOf={}, spouseOf={};
-  people.forEach(p=>{childrenOf[p.id]=[];parentsOf[p.id]=[];spouseOf[p.id]=[];});
-  STATE.rels.forEach(r=>{ if(!idset.has(r.from_id)||!idset.has(r.to_id))return; const t=(r.type||'').toUpperCase();
-    if(t.includes('PARENT')||t.includes('GRAND')){ childrenOf[r.from_id].push(r.to_id); parentsOf[r.to_id].push(r.from_id); }
-    else if(t.includes('CHILD')){ childrenOf[r.to_id].push(r.from_id); parentsOf[r.from_id].push(r.to_id); }
-    else if(t.includes('SPOUSE')){ spouseOf[r.from_id].push(r.to_id); spouseOf[r.to_id].push(r.from_id); }
-  });
-  const gens={}; people.forEach(p=>{ (gens[gen[p.id]]=gens[gen[p.id]]||[]).push(p.id); });
-  const levels=Object.keys(gens).map(Number).sort((a,b)=>a-b);
-  const order={}; levels.forEach(l=>gens[l].forEach((id,i)=>order[id]=i));
-  // crossing reduction — median heuristic, alternating up/down sweeps
-  for(let s=0;s<8;s++){ const down=s%2===0; const seq=down?levels.slice(1):[...levels].reverse().slice(1);
-    seq.forEach(l=>{ const key={};
-      gens[l].forEach(id=>{ const nb=(down?parentsOf[id]:childrenOf[id]).map(n=>order[n]).filter(v=>v!=null); key[id]=nb.length?median(nb):order[id]; });
-      gens[l].sort((a,b)=>(key[a]-key[b])||(order[a]-order[b])); gens[l].forEach((id,i)=>order[id]=i); });
-  }
-  // X coordinates: start on a grid, then centre parents over children + pull couples together
-  const GAP=92, BAND=132, R=16;
-  const x={}; levels.forEach(l=>gens[l].forEach(id=>x[id]=order[id]*GAP));
-  const resolve=l=>{ const a=[...gens[l]].sort((p,q)=>x[p]-x[q]); for(let i=1;i<a.length;i++){ if(x[a[i]]-x[a[i-1]]<GAP) x[a[i]]=x[a[i-1]]+GAP; } };
-  for(let pass=0;pass<6;pass++){
-    levels.slice(1).forEach(l=>{ gens[l].forEach(id=>{ const ps=parentsOf[id]; if(ps.length)x[id]=avg(ps.map(p=>x[p])); }); resolve(l); });
-    [...levels].reverse().slice(1).forEach(l=>{ gens[l].forEach(id=>{ const cs=childrenOf[id]; if(cs.length)x[id]=avg(cs.map(c=>x[c])); }); resolve(l); });
-    levels.forEach(l=>{ gens[l].forEach(id=>{ const sp=spouseOf[id].filter(s=>gen[s]===l); if(sp.length){ const m=avg([x[id],...sp.map(s=>x[s])]); x[id]=m; sp.forEach(s=>x[s]=m); } }); resolve(l); });
-  }
-  const pos={}; people.forEach(p=>pos[p.id]={x:x[p.id], y:gen[p.id]*BAND});
-  return {pos, gen, parentsOf, spouseOf, levels, BAND, R};
-}
-
-function buildTree(forceFit){
+// ── D3 tree (generational, fixed layout — pan/zoom + light drag) ──
+let fitTransform=null;
+function buildTree(){
   const svg=d3.select('#svg'), g=svg.select('#g'); g.selectAll('*').remove();
   const people=Object.values(STATE.people);
   const W=svg.node().clientWidth||900, H=svg.node().clientHeight||650;
   if(!people.length){
     g.append('text').attr('x',W/2).attr('y',H/2-14).attr('text-anchor','middle').attr('fill','rgba(255,255,255,.12)').attr('font-size','38px').text('🌳');
     g.append('text').attr('x',W/2).attr('y',H/2+20).attr('text-anchor','middle').attr('fill','rgba(255,255,255,.2)').attr('font-size','13px').text('No people yet — use “Add person” to start');
-    svg.on('click',()=>closeProfile()); return;
+    return;
   }
-  const {pos,gen,parentsOf,spouseOf,levels,BAND,R}=layoutTree(people);
-  const xs=Object.values(pos).map(p=>p.x), ys=Object.values(pos).map(p=>p.y);
+  const pos=computeLayout();
+  const nodes=people.map(p=>({...p,_c:color(p),x:pos[p.id]?.x||0,y:pos[p.id]?.y||0}));
+  const byId={}; nodes.forEach(n=>byId[n.id]=n);
+  const links=STATE.rels.filter(r=>byId[r.from_id]&&byId[r.to_id]).map(r=>({source:byId[r.from_id],target:byId[r.to_id],type:r.type}));
+
+  const link=g.append('g').selectAll('line').data(links).join('line')
+    .attr('x1',d=>d.source.x).attr('y1',d=>d.source.y).attr('x2',d=>d.target.x).attr('y2',d=>d.target.y)
+    .attr('stroke','rgba(255,255,255,.13)').attr('stroke-width',1.4)
+    .attr('stroke-dasharray',d=>(d.type||'').toUpperCase().includes('SPOUSE')?'4 3':null);
+
+  const node=g.append('g').selectAll('g').data(nodes).join('g')
+    .attr('transform',d=>`translate(${d.x},${d.y})`).style('cursor','pointer')
+    .call(d3.drag()
+      .on('start', function(e,d){ d._dragging=true; })
+      .on('drag', function(e,d){
+        const k=d3.zoomTransform(svg.node()).k;
+        d.x+=e.dx/k; d.y+=e.dy/k;
+        d3.select(this).attr('transform',`translate(${d.x},${d.y})`);
+        link.filter(l=>l.source.id===d.id||l.target.id===d.id)
+          .attr('x1',l=>l.source.x).attr('y1',l=>l.source.y).attr('x2',l=>l.target.x).attr('y2',l=>l.target.y);
+      })
+      .on('end', function(e,d){ d._dragging=false; }))
+    .on('click',(e,d)=>{ if(!d._dragging){ e.stopPropagation(); openProfile(d.id); } });
+  node.append('circle').attr('r',18).attr('fill',d=>d._c+'22').attr('stroke',d=>d._c).attr('stroke-width',1.5);
+  node.append('text').attr('text-anchor','middle').attr('dy','.35em').attr('font-size','9px').attr('font-weight','700').attr('fill',d=>d._c).style('pointer-events','none').text(d=>initials(d.full_name));
+  node.append('text').attr('text-anchor','middle').attr('dy','2.2em').attr('font-size','8px').attr('fill','rgba(255,255,255,.3)').style('pointer-events','none').text(d=>(d.full_name||'').split(' ')[0]);
+
+  const xs=nodes.map(n=>n.x), ys=nodes.map(n=>n.y);
   const minX=Math.min(...xs), maxX=Math.max(...xs), minY=Math.min(...ys), maxY=Math.max(...ys);
-
-  // generation rows + labels
-  const bands=g.append('g');
-  levels.forEach(l=>{ const y=l*BAND;
-    bands.append('line').attr('class','gen-band').attr('x1',minX-240).attr('x2',maxX+240).attr('y1',y-BAND/2).attr('y2',y-BAND/2);
-    bands.append('text').attr('class','gen-lbl').attr('x',minX-120).attr('y',y+3).text('Gen '+(l+1));
-  });
-
-  // spouse links (short dashed)
-  const seen=new Set(); const sg=g.append('g');
-  people.forEach(p=>(spouseOf[p.id]||[]).forEach(s=>{ const k=[p.id,s].sort().join('|'); if(seen.has(k)||!pos[s])return; seen.add(k);
-    sg.append('line').attr('x1',pos[p.id].x).attr('y1',pos[p.id].y).attr('x2',pos[s].x).attr('y2',pos[s].y).attr('stroke','rgba(212,160,90,.55)').attr('stroke-width',1.5).attr('stroke-dasharray','3 3'); }));
-
-  // parent → child elbow connectors (one per child, anchored at the parents' midpoint)
-  const cg=g.append('g');
-  people.forEach(p=>{ const ps=parentsOf[p.id]; if(!ps.length)return;
-    const ax=avg(ps.map(id=>pos[id].x)), ay=Math.max(...ps.map(id=>pos[id].y));
-    const cx=pos[p.id].x, cy=pos[p.id].y, mid=(ay+cy)/2;
-    cg.append('path').attr('d',`M ${ax} ${ay+R} V ${mid} H ${cx} V ${cy-R}`).attr('fill','none').attr('stroke','rgba(255,255,255,.18)').attr('stroke-width',1.4);
-  });
-
-  // nodes
-  const node=g.append('g').selectAll('g').data(people).join('g')
-    .attr('transform',d=>`translate(${pos[d.id].x},${pos[d.id].y})`).style('cursor','pointer')
-    .on('click',(e,d)=>{ e.stopPropagation(); openProfile(d.id); });
-  node.append('circle').attr('r',R).attr('fill',d=>color(d)+'22').attr('stroke',d=>color(d)).attr('stroke-width',1.6);
-  node.append('text').attr('text-anchor','middle').attr('dy','.35em').attr('font-size','8px').attr('font-weight','700').attr('fill',d=>color(d)).style('pointer-events','none').text(d=>initials(d.full_name));
-  node.append('text').attr('text-anchor','middle').attr('dy','2.35em').attr('font-size','8.5px').attr('fill','rgba(255,255,255,.55)').style('pointer-events','none').text(d=>(d.full_name||'').split(' ')[0]);
-
-  zoom=d3.zoom().scaleExtent([.08,3]).on('zoom',e=>{ lastTransform=e.transform; g.attr('transform',e.transform); });
-  svg.call(zoom).on('click',()=>closeProfile());
-
-  let T;
-  if(forceFit || !lastTransform){
-    const bw=Math.max(1,(maxX-minX)+320), bh=Math.max(1,(maxY-minY)+240);
-    const s=Math.min(1.1,.9*Math.min(W/bw,H/bh));
-    T=d3.zoomIdentity.translate(W/2 - s*(minX+maxX)/2, H/2 - s*(minY+maxY)/2).scale(s);
-  } else { T=lastTransform; }
-  svg.call(zoom.transform, T);
+  const tw=Math.max(maxX-minX,1), th=Math.max(maxY-minY,1);
+  const scale=Math.min(1.3,(W-100)/tw,(H-100)/th)||1;
+  const tx=W/2-(minX+maxX)/2*scale, ty=H/2-(minY+maxY)/2*scale;
+  fitTransform=d3.zoomIdentity.translate(tx,ty).scale(Math.max(scale,.25));
+  zoom=d3.zoom().scaleExtent([.15,3]).on('zoom',e=>g.attr('transform',e.transform));
+  svg.call(zoom).call(zoom.transform,fitTransform).on('click',()=>closeProfile());
 }
-function fitTree(){ buildTree(true); }
 function zIn(){ d3.select('#svg').transition().call(zoom?.scaleBy,1.4); }
 function zOut(){ d3.select('#svg').transition().call(zoom?.scaleBy,.72); }
-function zReset(){ fitTree(); }
+function zReset(){ d3.select('#svg').transition().call(zoom?.transform,fitTransform||d3.zoomIdentity); }
 
 // ── profile ──
-// compute the correct phrase for a relationship from the viewer's side
-function gw(g,m,f,n){ return g==='male'?m:g==='female'?f:n; }
-function relPhrase(rel, viewerId){
-  const isFrom=rel.from_id===viewerId; const otherId=isFrom?rel.to_id:rel.from_id; const other=STATE.people[otherId];
-  const g=STATE.people[viewerId]?.gender||'unknown'; const t=(rel.type||'').toUpperCase(); let phrase;
-  if(t.includes('GRAND')) phrase=isFrom?gw(g,'grandfather of','grandmother of','grandparent of'):gw(g,'grandson of','granddaughter of','grandchild of');
-  else if(t.includes('PARENT')) phrase=isFrom?gw(g,'father of','mother of','parent of'):gw(g,'son of','daughter of','child of');
-  else if(t.includes('CHILD')) phrase=isFrom?gw(g,'son of','daughter of','child of'):gw(g,'father of','mother of','parent of');
-  else if(t.includes('SPOUSE')) phrase=gw(g,'husband of','wife of','spouse of');
-  else if(t.includes('SIBLING')) phrase=gw(g,'brother of','sister of','sibling of');
-  else phrase=rel.label||'related to';
-  return {phrase,other,otherId};
-}
-function relKind(rel,viewerId){
-  const t=(rel.type||'').toUpperCase(); const isFrom=rel.from_id===viewerId;
-  if(t.includes('PARENT')||t.includes('GRAND')) return isFrom?'parent':'child';
-  if(t.includes('CHILD')) return isFrom?'child':'parent';
-  if(t.includes('SPOUSE')) return 'spouse';
-  if(t.includes('SIBLING')) return 'sibling';
-  return 'parent';
-}
-function kindToEdge(kind,viewerId,otherId){
-  if(kind==='parent') return {from_id:viewerId,to_id:otherId,type:'PARENT_OF',label:'parent of'};
-  if(kind==='child')  return {from_id:otherId,to_id:viewerId,type:'PARENT_OF',label:'parent of'};
-  if(kind==='spouse') return {from_id:viewerId,to_id:otherId,type:'SPOUSE_OF',label:'spouse of'};
-  return {from_id:viewerId,to_id:otherId,type:'SIBLING_OF',label:'sibling of'};
-}
-
-function openProfile(id){ renderProfile(id,false); }
-function closeProfile(){ document.getElementById('ppanel').classList.remove('open'); }
-function preConn(id){ document.getElementById('sel-a').value=id; nav('connect',document.querySelectorAll('.tab')[5]); }
-
-function renderProfile(id,edit){
+function openProfile(id){
   const p=STATE.people[id]; if(!p)return; const c=color(p);
   const av=document.getElementById('pp-av'); av.textContent=initials(p.full_name);
   av.style.cssText=`background:${c}22;color:${c};width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700`;
   set('pp-n',p.full_name||'—'); set('pp-s',[p.occupation,p.birth_place].filter(Boolean).join(' · ')||'');
   const my=STATE.rels.filter(r=>r.from_id===id||r.to_id===id);
-  const body=document.getElementById('pp-b');
-  const KINDS=[['parent','Parent of'],['child','Child of'],['spouse','Spouse of'],['sibling','Sibling of']];
-
-  if(!edit){
-    body.innerHTML=
-      (p.birth_year?`<div class="pp-r"><span class="pp-k">Born</span><span class="pp-v">${p.birth_year}${p.birth_place?' in '+esc(p.birth_place):''}</span></div>`:'')+
-      (p.current_location?`<div class="pp-r"><span class="pp-k">Lives</span><span class="pp-v">${esc(p.current_location)}</span></div>`:'')+
-      (p.gender&&p.gender!=='unknown'?`<div class="pp-r"><span class="pp-k">Gender</span><span class="pp-v">${esc(p.gender)}</span></div>`:'')+
-      (p.is_deceased?`<div class="pp-r"><span class="pp-v" style="color:var(--text3)">Deceased</span></div>`:'')+
-      (my.length?`<div style="margin-top:.5rem"><div class="qtag">Relationships</div>${my.map(r=>{const {phrase,other}=relPhrase(r,id);return `<span class="chip">${esc(phrase)} ${other?esc(other.full_name):'?'}</span>`;}).join('')}</div>`:`<div class="qtag" style="margin-top:.5rem">No relationships yet</div>`)+
-      `<div style="margin-top:.875rem;display:flex;gap:.5rem;flex-wrap:wrap">
-        <button class="btn btn-a" style="font-size:11px;padding:5px 10px" onclick="renderProfile('${id}',true)">Edit</button>
-        <button class="btn btn-s" style="font-size:11px;padding:5px 10px" onclick="preConn('${id}')">Connection</button>
-      </div>`;
-  } else {
-    const others=Object.values(STATE.people).filter(x=>x.id!==id);
-    body.innerHTML=
-      `<div class="qtag">Name</div><input class="pp-in" id="ef-name" value="${esc(p.full_name||'')}">
-       <div class="row2"><div><div class="qtag">Birth year</div><input class="pp-in" id="ef-year" value="${p.birth_year||''}"></div>
-       <div><div class="qtag">Gender</div><select class="pp-in" id="ef-gender"><option value="unknown"${(!p.gender||p.gender==='unknown')?' selected':''}>—</option><option value="male"${p.gender==='male'?' selected':''}>Male</option><option value="female"${p.gender==='female'?' selected':''}>Female</option></select></div></div>
-       <div class="qtag">Birthplace</div><input class="pp-in" id="ef-place" value="${esc(p.birth_place||'')}">
-       <div class="qtag">Occupation</div><input class="pp-in" id="ef-occ" value="${esc(p.occupation||'')}">
-       <label style="display:flex;gap:6px;align-items:center;font-size:11px;color:var(--text2);margin:2px 0 8px"><input type="checkbox" id="ef-dec" ${p.is_deceased?'checked':''}> Deceased</label>
-       <div class="qtag">Relationships <span style="color:var(--text3)">(this person is…)</span></div>
-       ${my.map(r=>{const {other,otherId}=relPhrase(r,id);const k=relKind(r,id);return `<div class="relrow"><span class="rn">${other?esc(other.full_name):'?'}</span>
-         <select class="relsel" onchange="setRel('${r.id}','${id}','${otherId}',this.value)">${KINDS.map(([kk,l])=>`<option value="${kk}"${k===kk?' selected':''}>${l}</option>`).join('')}</select>
-         <button class="rx" onclick="removeRel('${r.id}','${id}')">✕</button></div>`;}).join('')}
-       <div class="relrow" style="margin-top:6px">
-         <select class="relsel rn" id="ef-newp"><option value="">+ link to…</option>${others.map(o=>`<option value="${o.id}">${esc(o.full_name)}</option>`).join('')}</select>
-         <select class="relsel" id="ef-newk">${KINDS.map(([kk,l])=>`<option value="${kk}">${l}</option>`).join('')}</select>
-         <button class="rx" style="color:var(--gold);font-size:16px" onclick="addRel('${id}')">＋</button>
-       </div>
-       <div style="margin-top:.875rem;display:flex;gap:.5rem;align-items:center">
-        <button class="btn btn-a" style="font-size:11px;padding:5px 10px" onclick="saveFields('${id}')">Save</button>
-        <button class="btn btn-s" style="font-size:11px;padding:5px 10px" onclick="renderProfile('${id}',false)">Cancel</button>
-        <button class="btn btn-s" style="font-size:11px;padding:5px 10px;color:var(--red);margin-left:auto" onclick="delPerson('${id}')">Delete</button>
-       </div>`;
-  }
+  document.getElementById('pp-b').innerHTML=
+    (p.birth_year?`<div class="pp-r"><span class="pp-k">Born</span><span class="pp-v">${p.birth_year}${p.birth_place?' in '+esc(p.birth_place):''}</span></div>`:'')+
+    (p.current_location?`<div class="pp-r"><span class="pp-k">Lives</span><span class="pp-v">${esc(p.current_location)}</span></div>`:'')+
+    (p.is_deceased?`<div class="pp-r"><span class="pp-v" style="color:var(--text3)">Deceased</span></div>`:'')+
+    (my.length?`<div style="margin-top:.5rem"><div class="qtag">Connections</div>${my.slice(0,8).map(r=>{const o=r.from_id===id?r.to_id:r.from_id;const op=STATE.people[o];return `<span class="chip">${esc(r.label||r.type)} ${op?esc(op.full_name):'?'}</span>`;}).join('')}</div>`:'')+
+    `<div style="margin-top:.875rem;display:flex;gap:.5rem;flex-wrap:wrap">
+      <button class="btn btn-s" style="font-size:11px;padding:5px 10px" onclick="preConn('${id}')">Find connection</button>
+      <button class="btn btn-s" style="font-size:11px;padding:5px 10px;color:var(--red)" onclick="delPerson('${id}')">Delete</button>
+    </div>`;
   document.getElementById('ppanel').classList.add('open');
 }
-
-async function saveFields(id){
-  const body={ full_name:document.getElementById('ef-name').value.trim()||STATE.people[id].full_name,
-    birth_year:parseInt(document.getElementById('ef-year').value)||null,
-    birth_place:document.getElementById('ef-place').value.trim()||null,
-    occupation:document.getElementById('ef-occ').value.trim()||null,
-    gender:document.getElementById('ef-gender').value,
-    is_deceased:document.getElementById('ef-dec').checked };
-  try{ const rows=await api('PATCH',`people?id=eq.${id}`,body); STATE.people[id]={...STATE.people[id],...(rows[0]||body)}; refresh(); renderProfile(id,false); }
-  catch(e){ alert('Save failed: '+e.message); }
-}
-async function setRel(relId,viewerId,otherId,kind){
-  const edge=kindToEdge(kind,viewerId,otherId);
-  try{ await api('DELETE',`relationships?id=eq.${relId}`); STATE.rels=STATE.rels.filter(r=>r.id!==relId);
-    if(!STATE.rels.some(r=>r.from_id===edge.from_id&&r.to_id===edge.to_id&&(r.type||'').toUpperCase()===edge.type)){
-      const rows=await api('POST','relationships',edge); STATE.rels.push(rows[0]); }
-    refresh(); renderProfile(viewerId,true);
-  }catch(e){ alert('Update failed: '+e.message); }
-}
-async function addRel(viewerId){
-  const otherId=document.getElementById('ef-newp').value; const kind=document.getElementById('ef-newk').value; if(!otherId)return;
-  const edge=kindToEdge(kind,viewerId,otherId);
-  if(STATE.rels.some(r=>r.from_id===edge.from_id&&r.to_id===edge.to_id&&(r.type||'').toUpperCase()===edge.type)) return alert('That link already exists.');
-  try{ const rows=await api('POST','relationships',edge); STATE.rels.push(rows[0]); refresh(); renderProfile(viewerId,true); }
-  catch(e){ alert('Add failed: '+e.message); }
-}
-async function removeRel(relId,viewerId){
-  try{ await api('DELETE',`relationships?id=eq.${relId}`); STATE.rels=STATE.rels.filter(r=>r.id!==relId); refresh(); renderProfile(viewerId,true); }
-  catch(e){ alert('Delete failed: '+e.message); }
-}
+function closeProfile(){ document.getElementById('ppanel').classList.remove('open'); }
+function preConn(id){ document.getElementById('sel-a').value=id; nav('connect',document.querySelectorAll('.tab')[5]); }
 async function delPerson(id){
-  if(!confirm('Delete this person and all their links?'))return;
+  if(!confirm('Delete this person and their links?'))return;
   try{ await api('DELETE',`people?id=eq.${id}`); delete STATE.people[id];
     STATE.rels=STATE.rels.filter(r=>r.from_id!==id&&r.to_id!==id); closeProfile(); refresh(); }
   catch(e){ alert('Delete failed: '+e.message); }
-}
-async function wipeAll(){
-  if(!confirm('Delete ALL people and relationships? This cannot be undone.'))return;
-  try{
-    if(STATE.demo){ localStorage.setItem('ftd_people','[]'); localStorage.setItem('ftd_relationships','[]'); }
-    else { await api('DELETE','relationships?id=neq.00000000-0000-0000-0000-000000000000'); await api('DELETE','people?id=neq.00000000-0000-0000-0000-000000000000'); }
-    STATE.people={}; STATE.rels=[]; lastTransform=null; refresh(); alert('Tree cleared.');
-  }catch(e){ alert('Failed: '+e.message); }
 }
 
 // ── AI ──
@@ -734,36 +611,42 @@ async function callAI(prompt){
   const pr=PROV[STATE.aiProvider]; if(!pr) throw new Error('no-ai');
   const model=STATE.aiModel||pr.model;
   if(pr.anthropic){
-    const r=await fetch(pr.url,{method:'POST',headers:{'Content-Type':'application/json','x-api-key':STATE.aiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model,max_tokens:2000,messages:[{role:'user',content:prompt}]})});
+    const r=await fetch(pr.url,{method:'POST',headers:{'Content-Type':'application/json','x-api-key':STATE.aiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model,max_tokens:2000,temperature:0,messages:[{role:'user',content:prompt}]})});
     const d=await r.json(); if(!r.ok)throw new Error(d.error?.message||r.status); return d.content[0]?.text||'';
   }
-  const r=await fetch(pr.url,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${STATE.aiKey}`},body:JSON.stringify({model,max_tokens:2000,messages:[{role:'user',content:prompt}]})});
+  const r=await fetch(pr.url,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${STATE.aiKey}`},body:JSON.stringify({model,max_tokens:2000,temperature:0,messages:[{role:'user',content:prompt}]})});
   const d=await r.json(); if(!r.ok)throw new Error(d.error?.message||r.status); return d.choices[0]?.message?.content||'';
 }
 function parsePrompt(name,rel,ans){
   const qa=QUESTIONS.map(([id,q])=>`${id.toUpperCase()} (${q}): ${ans[id]||'(none)'}`).join('\n');
-  return `You convert a family interview into JSON. Output JSON only — no markdown, no commentary.
+  const existing=Object.values(STATE.people);
+  const existingList = existing.length
+    ? existing.map(p=>`- ${p.full_name}${p.birth_year?` (b. ${p.birth_year})`:''}${p.birth_place?`, ${p.birth_place}`:''}${p.is_deceased?' [deceased]':''}`).join('\n')
+    : '(tree is empty so far)';
+  return `You are extracting a family tree from one relative's interview answers. Be conservative: it is far better to omit an uncertain detail than to invent one.
 
-RESPONDENT (the subject of this interview): ${name}. Their relation to the interviewer: ${rel||'unknown'}.
+STRICT RULES (do not break these):
+1. Only include a person if their name is explicitly stated in the answers below. Never invent a name, age, birth year, place, or occupation that is not stated or very directly implied (e.g. "born in 1962" directly gives birthYear; do not infer a birth year from an age that wasn't given).
+2. Never turn a place name, village, organization, nickname-only reference, or pronoun into a separate person.
+3. Only create a relationship edge if the text explicitly states it or it is a single, unambiguous logical step (e.g. "my brother's daughter" means the brother is PARENT_OF that daughter). Do not chain multiple uncertain inferences together.
+4. PEOPLE ALREADY IN THE TREE are listed below. If someone in the answers is clearly one of these people, reuse their EXACT existing spelling of their name in your output (so they can be matched) instead of creating a near-duplicate with different spelling or details. Do not alter an existing person's already-known facts based on a vague new mention.
+5. Confidence scoring: 1.0 = name and fact stated verbatim; 0.7 = directly and unambiguously implied by one stated fact; 0.5 = a reasonable but uncertain guess. If your confidence would be below 0.5, omit that person or relationship entirely rather than including a low-confidence guess.
+6. Respond with ONLY raw JSON — no markdown fences, no commentary, no explanation text before or after.
 
+PEOPLE ALREADY IN THE TREE:
+${existingList}
+
+RESPONDENT: ${name} — stated relation to the interviewer: ${rel||'unknown'}
+
+INTERVIEW ANSWERS:
 ${qa}
 
-Rules — follow exactly:
-- Extract only people who are actually named. Never invent anyone.
-- Add a relationship only if it is explicitly stated or unambiguously implied. If unsure, omit it.
-- DIRECTION IS CRITICAL. "PARENT_OF" always goes FROM the parent TO the child. If ${name}'s father is Ram: {"from":"<Ram's id>","to":"respondent","type":"PARENT_OF"}. If ${name} has a son Mohit: {"from":"respondent","to":"<Mohit's id>","type":"PARENT_OF"}.
-- Do NOT use CHILD_OF. Express every parent/child bond as PARENT_OF (parent → child).
-- Only these types: PARENT_OF, SPOUSE_OF, SIBLING_OF. (SPOUSE_OF and SIBLING_OF are symmetric — list each pair once.)
-- Set "gender" for everyone you can: male if referred to as father/son/brother/husband/grandfather; female if mother/daughter/sister/wife/grandmother.
-- "INTERVIEWER" = the person who sent this interview. Use it only for how the respondent relates to that person.
-- Do not duplicate the same relationship.
-
-Schema:
-{"respondent":{"fullName":"","nicknames":[],"birthYear":null,"birthPlace":null,"currentLocation":null,"occupation":null,"isDeceased":false,"gender":"male|female|unknown"},
-"persons":[{"id":"p1","fullName":"","birthYear":null,"birthPlace":null,"occupation":null,"isDeceased":false,"gender":"male|female|unknown","confidence":0.9}],
-"relationships":[{"from":"respondent|p1|INTERVIEWER","to":"respondent|p1|INTERVIEWER","type":"PARENT_OF|SPOUSE_OF|SIBLING_OF","label":"father of","confidence":0.9}],
-"insights":{"summary":""}}
-Use sequential ids p1,p2,… Include the respondent as a person. confidence: 1=stated, 0.7=implied, 0.5=guess.`;
+Output schema (return exactly this shape):
+{"respondent":{"fullName":"","nicknames":[],"birthYear":null,"birthPlace":null,"currentLocation":null,"occupation":null,"isDeceased":false,"gender":"unknown"},
+"persons":[{"id":"p1","fullName":"","birthYear":null,"birthPlace":null,"occupation":null,"isDeceased":false,"gender":"unknown","confidence":0.9}],
+"relationships":[{"from":"respondent|p1|INTERVIEWER","to":"respondent|p1|INTERVIEWER","type":"PARENT_OF|CHILD_OF|SPOUSE_OF|SIBLING_OF|GRANDPARENT_OF|UNCLE_OF|AUNT_OF|COUSIN_OF|OTHER","label":"father of","confidence":0.9}],
+"insights":{"summary":"one or two factual sentences, no speculation"}}
+INTERVIEWER means the person who sent this interview (the tree owner). Always include the respondent. IDs for new persons: p1, p2, p3…`;
 }
 // rule-based fallback
 function ruleParse(name,rel,a){
@@ -792,8 +675,10 @@ async function doParse(name,rel,ans){
     const clean=raw.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();
     try{ parsed=JSON.parse(clean); }catch(e){ const m=raw.match(/\{[\s\S]+\}/); if(!m)throw new Error('AI returned invalid JSON'); parsed=JSON.parse(m[0]); }
   }
-  // normalize: fold respondent into persons
-  const persons=[...(parsed.persons||[])];
+  // normalize: fold respondent into persons, filtering out empty/low-confidence junk
+  const persons=(parsed.persons||[])
+    .filter(p=>p.fullName && p.fullName.trim().length>1)
+    .filter(p=>p.confidence===undefined || p.confidence>=0.45);
   if(parsed.respondent?.fullName && !persons.some(p=>p.id==='respondent')) persons.unshift({id:'respondent',...parsed.respondent,confidence:.95});
   // dup status
   persons.forEach(p=>{ const ex=Object.values(STATE.people).find(e=>norm(e.full_name)===norm(p.fullName)&&norm(p.fullName).length>2); p._status=ex?'merge':'new'; p._existing=ex?ex.id:null; });
@@ -801,46 +686,43 @@ async function doParse(name,rel,ans){
 }
 
 function reviewHTML(res){
-  return `<div class="slabel" style="margin:1.25rem 0 0">${res.persons.length} people · ${res.persons.filter(p=>p._status==='new').length} new · ${res.persons.filter(p=>p._status==='merge').length} already in tree</div>
-  <div class="grid">${res.persons.map(p=>`<div class="pc ${p._status}">
+  return `<div class="slabel" style="margin:1.25rem 0 0">${res.persons.length} people found · ${res.persons.filter(p=>p._status==='new').length} new · ${res.persons.filter(p=>p._status==='merge').length} already in tree</div>
+  <div class="psub" style="margin:.25rem 0 0">Review each card — click "Include" to exclude anything that looks wrong or unfamiliar before saving.</div>
+  <div class="grid">${res.persons.map(p=>`<div class="pc ${p._status}" id="pc-${esc(p.id)}">
     <div class="pc-top"><div class="pc-n">${esc(p.fullName)}</div><span class="pt ${p._status}">${p._status==='merge'?'matched':'new'}</span></div>
     ${p.birthYear?`<div class="pc-r">Born ${p.birthYear}${p.birthPlace?' · '+esc(p.birthPlace):''}</div>`:''}
     ${p.occupation?`<div class="pc-r">${esc(p.occupation)}</div>`:''}
     ${p.isDeceased?`<div class="pc-r" style="color:var(--text3)">Deceased</div>`:''}
+    ${p.confidence!==undefined?`<div class="pc-r">Confidence ${Math.round(p.confidence*100)}%</div>`:''}
+    <button class="btn btn-s" id="ex-${esc(p.id)}" style="font-size:10px;padding:4px 9px;margin-top:6px" onclick="toggleExclude('${esc(p.id)}',this)">Include ✓</button>
   </div>`).join('')}</div>
   ${res.insights?.summary?`<div class="summary"><b>Summary</b>${esc(res.insights.summary)}</div>`:''}`;
 }
+function toggleExclude(pid,b){
+  if(!parseResult)return; const p=parseResult.persons.find(x=>String(x.id)===String(pid)); if(!p)return;
+  p._excluded=!p._excluded;
+  document.getElementById('pc-'+pid).classList.toggle('excluded',p._excluded);
+  b.textContent=p._excluded?'Excluded ✕':'Include ✓';
+}
 
-function inferGenderLocal(localId, rels){
-  for(const r of rels){ const l=(r.label||'').toLowerCase();
-    if(r.from===localId){ if(/father|son|brother|husband|grandfather|grandson|uncle|nephew/.test(l))return 'male'; if(/mother|daughter|sister|wife|grandmother|granddaughter|aunt|niece/.test(l))return 'female'; }
-  }
-  return 'unknown';
-}
-function dupRel(f,t,type){
-  const sym=type.includes('SPOUSE')||type.includes('SIBLING');
-  return STATE.rels.some(x=>(((x.from_id===f&&x.to_id===t)||(sym&&x.from_id===t&&x.to_id===f)))&&(x.type||'').toUpperCase()===type);
-}
 async function saveTree(res){
   const rootP=Object.values(STATE.people).find(p=>norm(p.full_name)===norm(CONFIG.ROOT_PERSON));
   const interviewerId=rootP?rootP.id:null;
   const idMap={};
   for(const p of res.persons){
+    if(p._excluded) continue;
     if(p._status==='merge'){ idMap[p.id]=p._existing; continue; }
-    const g=(p.gender&&p.gender!=='unknown')?p.gender:inferGenderLocal(p.id,res.relationships);
     const rows=await api('POST','people',{ full_name:p.fullName, nicknames:p.nicknames||[], birth_year:p.birthYear||null,
       birth_place:p.birthPlace||null, current_location:p.currentLocation||null, occupation:p.occupation||null,
-      is_deceased:!!p.isDeceased, gender:g, source:'interview', added_by:res.name, confidence:p.confidence||0.9 });
+      is_deceased:!!p.isDeceased, gender:p.gender||'unknown', source:'interview', added_by:res.name, confidence:p.confidence||0.9 });
     idMap[p.id]=rows[0].id; STATE.people[rows[0].id]=rows[0];
   }
   for(const r of res.relationships){
-    let type=(r.type||'OTHER').toUpperCase();
-    let f=r.from==='INTERVIEWER'?interviewerId:idMap[r.from];
-    let t=r.to==='INTERVIEWER'?interviewerId:idMap[r.to];
-    if(type.includes('CHILD')){ const tmp=f; f=t; t=tmp; type='PARENT_OF'; }   // normalise to parent→child
+    const f=r.from==='INTERVIEWER'?interviewerId:idMap[r.from];
+    const t=r.to==='INTERVIEWER'?interviewerId:idMap[r.to];
     if(!f||!t||f===t) continue;
-    if(dupRel(f,t,type)) continue;
-    const rows=await api('POST','relationships',{from_id:f,to_id:t,type,label:r.label,confidence:r.confidence||0.9});
+    if(STATE.rels.some(x=>x.from_id===f&&x.to_id===t)) continue;
+    const rows=await api('POST','relationships',{from_id:f,to_id:t,type:r.type,label:r.label,confidence:r.confidence||0.9});
     STATE.rels.push(rows[0]);
   }
 }
@@ -865,7 +747,7 @@ async function ownerParse(){
 async function ivSave(){
   if(!parseResult)return; btn('iv-save',true,'Saving…');
   try{ await saveTree(parseResult); refresh(); document.getElementById('iv-result').innerHTML=''; clearForm();
-    note('iv-notice','ok',`Added ${parseResult.persons.filter(p=>p._status==='new').length} people to your tree.`); parseResult=null; }
+    note('iv-notice','ok',`Added ${parseResult.persons.filter(p=>p._status==='new'&&!p._excluded).length} people to your tree.`); parseResult=null; }
   catch(e){ note('iv-notice','err','Save failed: '+e.message); btn('iv-save',false,'Add to tree'); }
 }
 
