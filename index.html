@@ -1,242 +1,460 @@
+
+
+Script
+
+Write the complete v2 HTML file
+bash
+
+cat > /home/claude/familytree/family-tree-v2.html << 'HTMLEOF'
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Family Tree</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<title>Parivaar — Family Tree</title>
 <style>
+/* ════════════════════════════════════════════
+   TOKENS
+════════════════════════════════════════════ */
 :root{
-  --bg:#100f0e;--surface:#1a1917;--surface2:#232220;--surface3:#2d2b29;
-  --border:rgba(255,255,255,.07);--border-s:rgba(255,255,255,.14);
-  --text:#f0ede8;--text2:#a09890;--text3:#6b6460;
-  --gold:#c9935a;--gold-d:rgba(201,147,90,.12);--gold-b:rgba(201,147,90,.3);
-  --green:#5aaa7a;--green-d:rgba(90,170,122,.1);
-  --purple:#8f7ed4;--purple-d:rgba(143,126,212,.1);
-  --blue:#5a8fd4;--red:#d46a5a;--red-d:rgba(212,106,90,.1);
+  --bg:#f4f2ee; --surface:#fff; --surface2:#f8f6f2; --surface3:#efecea;
+  --border:rgba(0,0,0,.09); --border-s:rgba(0,0,0,.16);
+  --text:#1a1714; --text2:#6b6460; --text3:#a09890;
+  --gold:#c9935a; --gold-d:rgba(201,147,90,.12); --gold-b:rgba(201,147,90,.35);
+  --saffron:#e8792a; --saffron-d:rgba(232,121,42,.10);
+  --green:#3d8f5f; --green-d:rgba(61,143,95,.10);
+  --red:#c0392b; --red-d:rgba(192,57,43,.09);
+  --purple:#6c5fc7; --purple-d:rgba(108,95,199,.10);
+  --blue:#2a6fad; --blue-d:rgba(42,111,173,.10);
+  --card-w:120px; --card-h:148px;
+  --card-gap-x:40px; --card-gap-y:80px;
   --mono:'SF Mono','Fira Code',monospace;
+  --shadow:0 2px 8px rgba(0,0,0,.10);
+  --shadow-hover:0 6px 20px rgba(0,0,0,.16);
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%}
-body{background:var(--bg);color:var(--text);font:13px/1.55 -apple-system,'Segoe UI',system-ui,sans-serif}
-.screen{display:none}.screen.on{display:flex;flex-direction:column;min-height:100vh}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,'Segoe UI',system-ui,sans-serif;font-size:13px;line-height:1.5}
 input,textarea,select,button{font-family:inherit}
-.in{width:100%;background:var(--surface2);border:1px solid var(--border-s);border-radius:8px;color:var(--text);font-size:13px;padding:8px 11px;outline:none;transition:border-color .15s}
-.in:focus{border-color:var(--gold)}
-.in::placeholder{color:var(--text3)}
-textarea.in{resize:vertical;min-height:48px}
-.btn{padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:none;transition:all .12s}
-.btn-a{background:var(--gold);color:#1a1000}.btn-a:hover{opacity:.9}.btn-a:disabled{opacity:.4;cursor:not-allowed}
-.btn-s{background:var(--surface2);color:var(--text2);border:1px solid var(--border-s)}.btn-s:hover{background:var(--surface3);color:var(--text)}
-.btn-full{width:100%;padding:11px;font-size:14px}
-.eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--gold);margin-bottom:5px}
-.ptitle{font-size:21px;font-weight:700;letter-spacing:-.02em;margin-bottom:4px}
-.psub{font-size:12px;color:var(--text2);margin-bottom:1.5rem;max-width:560px}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:1rem;overflow:hidden}
-.card-h{padding:.875rem 1.125rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.card-t{font-size:13px;font-weight:600}
-.badge{font-size:9px;font-weight:600;padding:2px 8px;border-radius:20px;background:var(--gold-d);color:var(--gold);border:1px solid var(--gold-b);text-transform:uppercase;letter-spacing:.05em}
-.card-b{padding:1.125rem;display:flex;flex-direction:column;gap:.75rem}
-.qtag{font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:3px}
-.row2{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
-.brow{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.25rem}
-.notice{padding:.625rem .875rem;border-radius:7px;font-size:12px;margin-top:.75rem;display:none}
-.notice.on{display:block}
-.notice.ok{background:var(--green-d);color:var(--green);border:1px solid rgba(90,170,122,.25)}
-.notice.err{background:var(--red-d);color:var(--red);border:1px solid rgba(212,106,90,.25)}
-.notice.info{background:var(--gold-d);color:var(--gold);border:1px solid var(--gold-b)}
 
-/* setup / respond centering */
-#scr-setup,#scr-respond{align-items:center;justify-content:center;padding:1.5rem;background:radial-gradient(ellipse at 30% 15%,rgba(201,147,90,.06)0%,transparent 60%)}
-.box{background:var(--surface);border:1px solid var(--border-s);border-radius:16px;padding:2rem;width:100%;max-width:520px}
-.logo{font-size:34px;margin-bottom:.75rem}
-.code{font-family:var(--mono);font-size:11px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:2px 6px;color:var(--gold)}
-.steps{font-size:12px;color:var(--text2);line-height:1.9;margin-top:.5rem}
-.steps b{color:var(--text)}
+/* ════════ SCREENS ════════ */
+.screen{display:none}
+.screen.on{display:flex;flex-direction:column;height:100vh}
 
-/* topbar */
-.topbar{height:46px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 1rem;gap:.75rem;flex-shrink:0}
-.tname{font-size:13px;font-weight:600}
+/* ════════ SETUP ════════ */
+#scr-setup{align-items:center;justify-content:center;padding:1.5rem;
+  background:linear-gradient(135deg,#fff9f0 0%,#f4f2ee 100%)}
+.setup-box{background:var(--surface);border:1px solid var(--border-s);border-radius:18px;
+  padding:2.25rem;width:100%;max-width:460px;box-shadow:var(--shadow)}
+.setup-logo{font-size:38px;margin-bottom:.75rem}
+.setup-title{font-size:21px;font-weight:700;letter-spacing:-.02em;color:var(--text);margin-bottom:4px}
+.setup-sub{font-size:12px;color:var(--text2);margin-bottom:1.5rem;line-height:1.6}
+.setup-label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:4px;margin-top:1rem}
+.stin{width:100%;border:1px solid var(--border-s);border-radius:8px;
+  color:var(--text);font-size:13px;padding:8px 11px;outline:none;
+  background:var(--surface2);transition:border-color .15s}
+.stin:focus{border-color:var(--saffron)}
+.stin::placeholder{color:var(--text3)}
+.sbtn{width:100%;padding:11px;border-radius:9px;font-size:13px;font-weight:700;
+  cursor:pointer;border:none;transition:all .15s;margin-top:.75rem}
+.sbtn-a{background:var(--saffron);color:#fff}.sbtn-a:hover{opacity:.9}
+.sbtn-a:disabled{opacity:.4;cursor:not-allowed}
+.sbtn-s{background:var(--surface2);color:var(--text2);border:1px solid var(--border-s)}
+.sbtn-s:hover{background:var(--surface3)}
+.smsg{font-size:12px;padding:.5rem .75rem;border-radius:7px;margin-top:.625rem;display:none}
+.smsg.err{background:var(--red-d);color:var(--red);border:1px solid rgba(192,57,43,.2);display:block}
+.smsg.info{background:var(--saffron-d);color:var(--saffron);border:1px solid rgba(232,121,42,.3);display:block}
+.setup-or{text-align:center;color:var(--text3);font-size:11px;margin:.75rem 0;position:relative}
+.setup-or::before,.setup-or::after{content:'';position:absolute;top:50%;width:42%;height:1px;background:var(--border)}
+.setup-or::before{left:0}.setup-or::after{right:0}
+.setup-steps{font-size:11px;color:var(--text2);background:var(--surface2);border-radius:8px;
+  padding:.75rem 1rem;line-height:2;margin-top:.75rem}
+.setup-steps b{color:var(--text)}
+.code{font-family:var(--mono);font-size:10px;background:rgba(201,147,90,.12);
+  border:1px solid rgba(201,147,90,.25);border-radius:4px;padding:1px 5px;color:var(--saffron)}
+
+/* ════════ TOP BAR ════════ */
+.topbar{height:48px;background:var(--surface);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 1rem;gap:.75rem;flex-shrink:0;
+  box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.tb-logo{font-size:20px}
+.tb-name{font-size:14px;font-weight:700;letter-spacing:-.01em;color:var(--text)}
+.tb-tree{font-size:11px;color:var(--text3)}
+.tb-div{width:1px;height:20px;background:var(--border-s)}
 .tabs{display:flex;gap:2px;overflow-x:auto}
-.tab{padding:5px 11px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;color:var(--text3);border:none;background:transparent;white-space:nowrap;transition:all .12s}
-.tab:hover{color:var(--text);background:var(--surface2)}.tab.on{color:var(--gold);background:var(--gold-d)}
-.spacer{flex:1}
-.tstat{font-size:11px;color:var(--text3);font-family:var(--mono)}.tstat b{color:var(--text)}
+.tab{padding:5px 12px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;
+  color:var(--text2);border:none;background:transparent;white-space:nowrap;transition:all .12s}
+.tab:hover{background:var(--surface2);color:var(--text)}
+.tab.on{background:var(--saffron-d);color:var(--saffron)}
+.tb-space{flex:1}
+.tb-stat{font-size:11px;color:var(--text2);font-family:var(--mono)}
+.tb-stat b{color:var(--text);font-weight:600}
+.tb-action{padding:5px 12px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;
+  background:var(--saffron);color:#fff;border:none;transition:opacity .12s}
+.tb-action:hover{opacity:.88}
 
-/* shell */
-.shell{display:flex;flex:1;overflow:hidden;height:calc(100vh - 46px)}
-.side{width:210px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column}
-.side-s{padding:.625rem .75rem}
-.slabel{font-size:9px;text-transform:uppercase;letter-spacing:.09em;color:var(--text3);margin:.25rem 0 .5rem}
-.prow{display:flex;align-items:center;gap:7px;padding:5px 7px;border-radius:7px;cursor:pointer}
+/* ════════ APP SHELL ════════ */
+.shell{display:flex;flex:1;overflow:hidden;height:calc(100vh - 48px)}
+
+/* ════════ SIDEBAR ════════ */
+.side{width:220px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;overflow-y:auto}
+.side-search{padding:.625rem .75rem;border-bottom:1px solid var(--border)}
+.side-sin{width:100%;background:var(--surface2);border:1px solid var(--border);
+  border-radius:7px;color:var(--text);font-size:12px;padding:6px 9px;outline:none}
+.side-sin:focus{border-color:var(--saffron)}
+.slabel{font-size:9px;text-transform:uppercase;letter-spacing:.09em;color:var(--text3);
+  padding:.625rem .75rem .25rem}
+.prow{display:flex;align-items:center;gap:7px;padding:5px .75rem;cursor:pointer;transition:background .1s}
 .prow:hover{background:var(--surface2)}
-.av{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0}
+.prow.sel{background:var(--saffron-d)}
+.pav{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.pav img{width:28px;height:28px;border-radius:50%;object-fit:cover}
 .pn{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pm{font-size:10px;color:var(--text3)}
-.canvas{flex:1;position:relative;overflow:hidden}
-.panel{position:absolute;inset:0;overflow-y:auto;display:none}.panel.on{display:block}
-#p-tree{overflow:hidden}
-.wrap{max-width:720px;margin:0 auto;padding:1.5rem}
 
-/* tree */
-#svg{width:100%;height:100%;cursor:grab;display:block}#svg:active{cursor:grabbing}
-.tctl{position:absolute;bottom:1.25rem;right:1.25rem;display:flex;flex-direction:column;gap:5px}
-.cbtn{width:30px;height:30px;border-radius:7px;background:var(--surface);border:1px solid var(--border-s);color:var(--text2);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.cbtn:hover{background:var(--surface2);color:var(--text)}
-.legend{position:absolute;top:1rem;left:1rem;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:.5rem .875rem;display:flex;flex-direction:column;gap:4px}
+/* ════════ CANVAS ════════ */
+.canvas{flex:1;position:relative;overflow:hidden}
+.panel{position:absolute;inset:0;overflow-y:auto;display:none}
+.panel.on{display:block}
+#p-tree{overflow:hidden;background:var(--bg);cursor:grab}
+#p-tree:active{cursor:grabbing}
+
+/* ════════════════════════════════════════════
+   CARD-BASED GENEALOGY TREE (Image 1 style)
+════════════════════════════════════════════ */
+#tree-canvas{position:relative;transform-origin:0 0}
+.gen-row{display:flex;align-items:flex-start;justify-content:center;
+  position:absolute;left:0;right:0}
+
+/* Person Card */
+.pcard{
+  position:absolute;
+  width:var(--card-w);
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:12px;
+  box-shadow:var(--shadow);
+  cursor:pointer;
+  transition:box-shadow .18s, border-color .18s, transform .12s;
+  overflow:hidden;
+  user-select:none;
+}
+.pcard:hover{box-shadow:var(--shadow-hover);border-color:rgba(0,0,0,.22);transform:translateY(-2px)}
+.pcard.selected{border-color:var(--saffron);box-shadow:0 0 0 3px rgba(232,121,42,.2)}
+.pcard.root-card{border-color:var(--saffron);border-width:2px}
+.pcard-photo{width:100%;height:72px;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#f0ece6 0%,#e8e2d8 100%);position:relative;overflow:hidden}
+.pcard-photo img{width:100%;height:100%;object-fit:cover}
+.pcard-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:16px;font-weight:700;color:#fff;position:relative}
+.pcard-gender-icon{position:absolute;bottom:4px;right:4px;
+  width:16px;height:16px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:9px;border:1.5px solid #fff}
+.pcard-body{padding:6px 7px 7px;text-align:center}
+.pcard-name{font-size:10.5px;font-weight:600;color:var(--text);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:1px}
+.pcard-rel{font-size:9px;color:var(--saffron);font-weight:500;margin-bottom:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pcard-years{font-size:9px;color:var(--text3)}
+.pcard-add{width:var(--card-w);height:var(--card-h);
+  background:rgba(255,255,255,.6);border:1.5px dashed var(--border-s);
+  border-radius:12px;cursor:pointer;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:4px;
+  position:absolute;transition:all .15s}
+.pcard-add:hover{background:#fff;border-color:var(--saffron)}
+.pcard-add-icon{font-size:20px;color:var(--text3)}
+.pcard-add-label{font-size:9px;color:var(--text3);text-align:center;padding:0 4px;line-height:1.3}
+
+/* SVG connector lines */
+#tree-svg{position:absolute;top:0;left:0;pointer-events:none;overflow:visible}
+.connector{fill:none;stroke:#c8bfb0;stroke-width:1.5}
+.connector-spouse{stroke:#e8c090;stroke-dasharray:4 3}
+.connector-sibling{stroke:#b8d4c0;stroke-dasharray:3 3}
+
+/* Tree controls */
+.tree-ctl{position:absolute;bottom:1.25rem;right:1.25rem;
+  display:flex;flex-direction:column;gap:5px;z-index:10}
+.tc-btn{width:30px;height:30px;border-radius:7px;background:var(--surface);
+  border:1px solid var(--border-s);color:var(--text2);font-size:15px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow);
+  transition:all .12s}
+.tc-btn:hover{background:var(--surface2);color:var(--text)}
+.tree-info{position:absolute;top:1rem;left:1rem;
+  background:rgba(255,255,255,.92);backdrop-filter:blur(8px);
+  border:1px solid var(--border);border-radius:10px;padding:.5rem .875rem;
+  display:flex;flex-direction:column;gap:4px;box-shadow:var(--shadow)}
 .li{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--text2)}
-.dot{width:7px;height:7px;border-radius:50%}
+.ldot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* ════════ WRAP (non-tree panels) ════════ */
+.wrap{max-width:700px;margin:0 auto;padding:1.5rem 1.5rem 3rem}
+.eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--saffron);margin-bottom:4px}
+.ptitle{font-size:20px;font-weight:700;letter-spacing:-.02em;margin-bottom:4px}
+.psub{font-size:12px;color:var(--text2);margin-bottom:1.5rem;max-width:520px;line-height:1.6}
+
+/* form cards */
+.icard{background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  margin-bottom:.875rem;overflow:hidden;box-shadow:var(--shadow)}
+.icard-h{padding:.75rem 1.125rem;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between}
+.icard-t{font-size:13px;font-weight:600}
+.badge{font-size:9px;font-weight:600;padding:2px 7px;border-radius:20px;
+  background:var(--saffron-d);color:var(--saffron);border:1px solid rgba(232,121,42,.3);
+  text-transform:uppercase;letter-spacing:.05em}
+.icard-b{padding:1rem 1.125rem;display:flex;flex-direction:column;gap:.75rem}
+.qtag{font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:3px}
+.qin{width:100%;background:var(--surface2);border:1px solid var(--border-s);
+  border-radius:7px;color:var(--text);font-size:12px;padding:7px 10px;outline:none;
+  resize:vertical;min-height:46px;transition:border-color .15s}
+.qin:focus{border-color:var(--saffron)}
+.qin::placeholder{color:var(--text3)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.brow{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.25rem}
+.btn{padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;
+  border:none;transition:all .12s}
+.btn-a{background:var(--saffron);color:#fff}.btn-a:hover{opacity:.9}
+.btn-a:disabled{opacity:.35;cursor:not-allowed}
+.btn-s{background:var(--surface2);color:var(--text2);border:1px solid var(--border-s)}
+.btn-s:hover{background:var(--surface3);color:var(--text)}
+.btn-full{width:100%;padding:10px}
+.notice{padding:.625rem .875rem;border-radius:7px;font-size:12px;
+  margin-top:.75rem;display:none}
+.notice.on{display:block}
+.notice.ok{background:var(--green-d);color:var(--green);border:1px solid rgba(61,143,95,.25)}
+.notice.err{background:var(--red-d);color:var(--red);border:1px solid rgba(192,57,43,.2)}
+.notice.info{background:var(--saffron-d);color:var(--saffron);border:1px solid rgba(232,121,42,.3)}
+
+/* thinking */
+.thinking{background:var(--purple-d);border:1px solid rgba(108,95,199,.2);
+  border-radius:9px;padding:.75rem 1rem;margin-top:.75rem;display:none}
+.thinking.on{display:block}
+.think-h{font-size:12px;font-weight:600;color:var(--purple);margin-bottom:4px;
+  display:flex;align-items:center;gap:6px}
+.dots span{animation:blink 1.4s infinite}
+.dots span:nth-child(2){animation-delay:.2s}
+.dots span:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,80%,100%{opacity:.15}40%{opacity:1}}
+.think-log{font-size:10px;color:var(--purple);opacity:.7;
+  font-family:var(--mono);line-height:1.8;max-height:72px;overflow-y:auto}
 
 /* result cards */
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:.625rem;margin-top:.875rem}
-.pc{background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:.75rem}
-.pc.new{border-color:var(--gold-b);background:var(--gold-d)}
-.pc.merge{border-color:rgba(90,170,122,.3);background:var(--green-d)}
-.pc.excluded{opacity:.35}
-.pc-top{display:flex;justify-content:space-between;gap:6px;margin-bottom:4px}
-.pc-n{font-size:12px;font-weight:600}
-.pt{font-size:8px;font-weight:700;padding:2px 6px;border-radius:20px;text-transform:uppercase;flex-shrink:0}
-.pt.new{background:var(--gold-d);color:var(--gold)}.pt.merge{background:var(--green-d);color:var(--green)}
-.pc-r{font-size:10px;color:var(--text3);margin-top:2px}
-.summary{margin-top:1rem;padding:.875rem;background:var(--gold-d);border:1px solid var(--gold-b);border-radius:9px;font-size:12px;color:var(--text2);line-height:1.7}
-.summary b{font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:var(--gold);display:block;margin-bottom:4px}
+.rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:.625rem;margin-top:.75rem}
+.rc{background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:.75rem}
+.rc.new{border-color:rgba(232,121,42,.35);background:var(--saffron-d)}
+.rc.merge{border-color:rgba(61,143,95,.3);background:var(--green-d)}
+.rc-top{display:flex;justify-content:space-between;gap:5px;margin-bottom:4px}
+.rc-n{font-size:12px;font-weight:600}
+.rtag{font-size:8px;font-weight:700;padding:2px 6px;border-radius:20px;text-transform:uppercase}
+.rtag.new{background:var(--saffron-d);color:var(--saffron)}
+.rtag.merge{background:var(--green-d);color:var(--green)}
+.rc-d{font-size:10px;color:var(--text3);margin-top:2px}
+.ai-summary{margin-top:1rem;padding:.875rem;background:var(--saffron-d);
+  border:1px solid rgba(232,121,42,.3);border-radius:9px;font-size:12px;
+  color:var(--text2);line-height:1.7}
+.ai-summary b{font-size:9px;text-transform:uppercase;letter-spacing:.07em;
+  color:var(--saffron);display:block;margin-bottom:3px}
 
-/* invites / responses list */
-.lcard{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.875rem 1.125rem;margin-bottom:.625rem}
+/* invites */
+.lcard{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  padding:.875rem 1.125rem;margin-bottom:.625rem;box-shadow:var(--shadow)}
 .lc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem}
-.istat{font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;text-transform:uppercase}
-.pend{background:var(--gold-d);color:var(--gold);border:1px solid var(--gold-b)}
-.used{background:var(--green-d);color:var(--green);border:1px solid rgba(90,170,122,.3)}
+.ist{font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;text-transform:uppercase}
+.pend{background:var(--saffron-d);color:var(--saffron);border:1px solid rgba(232,121,42,.3)}
+.used{background:var(--green-d);color:var(--green);border:1px solid rgba(61,143,95,.3)}
 .urlrow{display:flex;gap:.5rem;align-items:center}
-.url{flex:1;font-size:11px;font-family:var(--mono);color:var(--text3);background:var(--surface2);border:1px solid var(--border-s);border-radius:6px;padding:5px 9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.cp{padding:5px 10px;border-radius:6px;font-size:10px;font-weight:600;cursor:pointer;background:var(--surface2);border:1px solid var(--border-s);color:var(--text2);white-space:nowrap}
+.url{flex:1;font-size:10px;font-family:var(--mono);color:var(--text3);
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:6px;padding:5px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cp{padding:5px 10px;border-radius:6px;font-size:10px;font-weight:600;cursor:pointer;
+  background:var(--surface2);border:1px solid var(--border-s);color:var(--text2)}
 .cp:hover{background:var(--surface3)}.cp.done{color:var(--green)}
 .meta{font-size:10px;color:var(--text3);margin-top:4px}
 
 /* analytics */
-.mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.75rem;margin-bottom:1.5rem}
-.mc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.875rem 1rem}
-.mv{font-size:25px;font-weight:700;font-family:var(--mono);letter-spacing:-.03em}
+.mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:.75rem;margin-bottom:1.5rem}
+.mc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.875rem 1rem;box-shadow:var(--shadow)}
+.mv{font-size:26px;font-weight:700;font-family:var(--mono);letter-spacing:-.03em}
 .ml{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-top:2px}
-.cgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1rem}
-.cc{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:1rem 1.25rem}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem}
+.cc{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:1rem 1.25rem;box-shadow:var(--shadow)}
 .ct{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text2);margin-bottom:.875rem}
 .bar{display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem}
-.bl{font-size:10px;color:var(--text2);min-width:84px;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.bt{flex:1;height:5px;background:var(--surface2);border-radius:3px}
+.bl{font-size:10px;color:var(--text2);min-width:88px;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bt{flex:1;height:5px;background:var(--surface3);border-radius:3px}
 .bf{height:100%;border-radius:3px}
-.bn{font-size:10px;color:var(--text3);font-family:var(--mono);min-width:16px}
+.bn{font-size:10px;color:var(--text3);font-family:var(--mono);min-width:14px}
 
 /* connection */
 .csel{display:grid;grid-template-columns:1fr auto 1fr;gap:.875rem;align-items:end;margin-bottom:1rem}
 .csep{font-size:18px;color:var(--text3);text-align:center;padding-bottom:4px}
-.cbadge{display:inline-block;padding:4px 14px;border-radius:20px;font-size:13px;font-weight:600;background:var(--gold-d);border:1px solid var(--gold-b);color:var(--gold);margin-bottom:.875rem}
+.cbadge{display:inline-block;padding:4px 14px;border-radius:20px;font-size:13px;font-weight:700;
+  background:var(--saffron-d);border:1px solid rgba(232,121,42,.3);color:var(--saffron);margin-bottom:.875rem}
 .path{display:flex;flex-wrap:wrap;align-items:center;gap:.375rem;margin-bottom:1rem}
-.pnode{padding:3px 10px;border-radius:20px;font-size:11px;background:var(--surface2);border:1px solid var(--border-s)}
-.pnode.a{background:var(--gold-d);border-color:var(--gold-b);color:var(--gold)}
-.pnode.b{background:var(--green-d);border-color:rgba(90,170,122,.3);color:var(--green)}
-.parr{color:var(--text3)}
-.cexpl{font-size:12px;color:var(--text2);line-height:1.75;padding:.875rem;background:var(--surface2);border-radius:8px}
+.pnode{padding:3px 10px;border-radius:20px;font-size:11px;
+  background:var(--surface2);border:1px solid var(--border-s)}
+.pnode.a{background:var(--saffron-d);border-color:rgba(232,121,42,.3);color:var(--saffron)}
+.pnode.b{background:var(--green-d);border-color:rgba(61,143,95,.3);color:var(--green)}
+.parr{color:var(--text3);font-size:11px}
+.cexpl{font-size:12px;color:var(--text2);line-height:1.75;padding:.875rem;
+  background:var(--surface2);border-radius:8px}
 
 /* providers */
 .pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:.5rem;margin-bottom:.875rem}
-.pbtn{padding:8px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border-s);background:var(--surface2);color:var(--text2);text-align:center}
-.pbtn:hover{background:var(--surface3);color:var(--text)}.pbtn.on{border-color:var(--gold-b);background:var(--gold-d);color:var(--gold)}
+.pbtn{padding:8px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;
+  border:1px solid var(--border-s);background:var(--surface2);color:var(--text2);text-align:center}
+.pbtn:hover{background:var(--surface3)}.pbtn.on{border-color:rgba(232,121,42,.35);background:var(--saffron-d);color:var(--saffron)}
 
-/* profile */
-.poverlay{position:fixed;inset:0;z-index:200;pointer-events:none;display:flex;align-items:flex-start;justify-content:flex-end;padding:3.5rem 1rem 1rem}
-.ppanel{background:var(--surface);border:1px solid var(--border-s);border-radius:14px;width:270px;overflow:hidden;pointer-events:all;transform:translateX(300px);transition:transform .22s}
+/* profile drawer */
+.poverlay{position:fixed;inset:0;z-index:300;pointer-events:none;
+  display:flex;align-items:flex-start;justify-content:flex-end;padding:3.5rem 1rem 1rem}
+.ppanel{background:var(--surface);border:1px solid var(--border-s);border-radius:14px;
+  width:288px;overflow:hidden;pointer-events:all;
+  transform:translateX(310px);transition:transform .22s;box-shadow:0 8px 32px rgba(0,0,0,.16)}
 .ppanel.open{transform:translateX(0)}
-.pp-h{padding:1.125rem;border-bottom:1px solid var(--border);position:relative}
-.pp-x{position:absolute;top:.75rem;right:.75rem;width:22px;height:22px;border-radius:50%;background:var(--surface2);border:1px solid var(--border-s);cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;color:var(--text3)}
-.pp-av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;margin-bottom:.625rem}
-.pp-n{font-size:15px;font-weight:700}.pp-s{font-size:11px;color:var(--text3)}
-.pp-b{padding:.875rem 1.125rem}
-.pp-r{display:flex;gap:.375rem;font-size:11px;margin-bottom:.375rem}
-.pp-k{color:var(--text3);min-width:54px}.pp-v{color:var(--text2)}
-.chip{display:inline-block;padding:2px 7px;border-radius:20px;font-size:10px;background:var(--surface2);color:var(--text2);border:1px solid var(--border);margin:2px 2px 0 0}
+.pp-head{padding:1.125rem;border-bottom:1px solid var(--border);position:relative}
+.pp-x{position:absolute;top:.75rem;right:.75rem;width:22px;height:22px;border-radius:50%;
+  background:var(--surface2);border:1px solid var(--border);cursor:pointer;
+  font-size:12px;display:flex;align-items:center;justify-content:center;color:var(--text2)}
+.pp-av{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:17px;font-weight:700;margin-bottom:.625rem;overflow:hidden}
+.pp-av img{width:44px;height:44px;object-fit:cover}
+.pp-name{font-size:16px;font-weight:700;letter-spacing:-.02em}
+.pp-sub{font-size:11px;color:var(--text3)}
+.pp-body{padding:.875rem 1.125rem}
+.pp-row{display:flex;gap:.375rem;font-size:11px;margin-bottom:.375rem}
+.pp-key{color:var(--text3);min-width:58px}
+.pp-val{color:var(--text2)}
+.pp-hin{font-size:10px;font-weight:600;color:var(--saffron);margin-top:4px}
+.chip{display:inline-block;padding:2px 7px;border-radius:20px;font-size:10px;
+  background:var(--surface2);color:var(--text2);border:1px solid var(--border);margin:2px 2px 0 0}
+.pp-in{width:100%;background:var(--surface2);border:1px solid var(--border-s);
+  border-radius:6px;color:var(--text);font-size:11px;padding:5px 8px;outline:none;margin-bottom:4px}
+.pp-in:focus{border-color:var(--saffron)}
+.relrow{display:flex;gap:4px;align-items:center;margin-bottom:4px;font-size:11px}
+.rn{flex:1;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.relsel{background:var(--surface2);border:1px solid var(--border-s);border-radius:5px;
+  color:var(--text);font-size:10px;padding:3px 4px;outline:none;max-width:90px}
+.rx{cursor:pointer;color:var(--text3);font-size:13px;padding:0 3px;border:none;background:none}
+.rx:hover{color:var(--red)}
 
-.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3.5rem 2rem;color:var(--text3);gap:.5rem;text-align:center}
-.ei{font-size:34px;opacity:.3}
-.et{font-size:14px;color:var(--text2);font-weight:500}
-.es{font-size:12px;max-width:240px;line-height:1.6}
-.respsec{font-size:10px;text-transform:uppercase;letter-spacing:.09em;color:var(--text3);margin-top:.5rem}
-.thanks{text-align:center;padding:2.5rem 1rem;display:none}
+/* respond screen */
+#scr-respond{align-items:center;justify-content:center;padding:1.5rem;
+  min-height:100vh;height:auto;background:linear-gradient(135deg,#fff9f0 0%,#f4f2ee 100%)}
+.rbox{background:var(--surface);border:1px solid var(--border-s);border-radius:16px;
+  width:100%;max-width:540px;overflow:hidden;box-shadow:var(--shadow)}
+.rbox-hero{padding:1.5rem 1.5rem 1rem;border-bottom:1px solid var(--border)}
+.rbox-tn{font-size:10px;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--saffron);margin-bottom:3px}
+.rbox-form{padding:1.25rem 1.5rem 1.5rem;display:flex;flex-direction:column;gap:.625rem}
+.rsec{font-size:9px;text-transform:uppercase;letter-spacing:.09em;
+  color:var(--text3);margin-top:.5rem}
+.thanks{text-align:center;padding:2.5rem 1.5rem}
+
+/* misc */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:3rem 2rem;color:var(--text3);gap:.5rem;text-align:center}
+.ei{font-size:34px;opacity:.3}.et{font-size:14px;color:var(--text2);font-weight:500}
+.es{font-size:12px;max-width:220px;line-height:1.6}
+select.qin{resize:none;min-height:unset}
 </style>
 </head>
 <body>
 
-<!-- ════════ SETUP (shown if config not filled) ════════ -->
+<!-- ════════ SETUP ════════ -->
 <div class="screen" id="scr-setup">
-  <div class="box">
-    <div class="logo">🌳</div>
-    <div class="ptitle">Almost ready</div>
-    <div class="psub">This file isn't connected to a database yet. Open <span class="code">index.html</span>, find the <span class="code">CONFIG</span> block near the top of the script, and paste your Supabase URL and anon key.</div>
-    <div class="steps">
-      <b>1.</b> Create a free project at <span class="code">supabase.com</span> (no card needed)<br>
-      <b>2.</b> SQL Editor → paste <span class="code">schema.sql</span> → Run<br>
-      <b>3.</b> Settings → API → copy <b>Project URL</b> + <b>anon public</b> key<br>
-      <b>4.</b> Paste both into <span class="code">CONFIG</span> and re-deploy
+  <div class="setup-box">
+    <div class="setup-logo">🌳</div>
+    <div class="setup-title">Parivaar — Family Tree</div>
+    <div class="setup-sub">A living record of your family, built one conversation at a time. Built for Indian families with Hindu relationship terms.</div>
+    <div class="setup-label">Your name (the root of the tree)</div>
+    <input class="stin" id="cfg-root" placeholder="e.g. Satyam Tiwari">
+    <div class="setup-label">Tree name</div>
+    <input class="stin" id="cfg-tree" placeholder="e.g. Tiwari Parivaar">
+    <div class="setup-label">Supabase URL</div>
+    <input class="stin" id="cfg-sburl" placeholder="https://xxx.supabase.co">
+    <div class="setup-label">Supabase anon key</div>
+    <input class="stin" id="cfg-sbkey" placeholder="eyJhbGc…" type="password">
+    <button class="sbtn sbtn-a" onclick="createSession()">Start my tree →</button>
+    <div class="smsg" id="setup-msg"></div>
+    <div class="setup-or">or</div>
+    <button class="sbtn sbtn-s" onclick="demoMode()">Try with demo data</button>
+    <div class="setup-steps">
+      <b>No Supabase yet?</b> Create a free project at <span class="code">supabase.com</span><br>
+      SQL Editor → paste <span class="code">schema.sql</span> → Run → copy URL + anon key above
     </div>
-    <button class="btn btn-s btn-full" style="margin-top:1.25rem" onclick="startDemo()">Try the demo first (no setup)</button>
   </div>
 </div>
 
-<!-- ════════ APP (owner) ════════ -->
+<!-- ════════ APP ════════ -->
 <div class="screen" id="scr-app">
   <nav class="topbar">
-    <span style="font-size:18px">🌳</span>
-    <span class="tname" id="t-name">Family Tree</span>
-    <div style="width:1px;height:18px;background:var(--border-s)"></div>
+    <div class="tb-logo">🌳</div>
+    <div>
+      <div class="tb-name" id="tb-name">Parivaar</div>
+    </div>
+    <div class="tb-div"></div>
     <div class="tabs">
-      <button class="tab on" onclick="nav('tree',this)">Tree</button>
+      <button class="tab on" onclick="nav('tree',this)">वृक्ष · Tree</button>
       <button class="tab" onclick="nav('interview',this)">Add person</button>
       <button class="tab" onclick="nav('responses',this)">Responses <span id="resp-dot"></span></button>
       <button class="tab" onclick="nav('invites',this)">Invite links</button>
       <button class="tab" onclick="nav('insights',this)">Insights</button>
-      <button class="tab" onclick="nav('connect',this)">Connections</button>
+      <button class="tab" onclick="nav('connect',this)">Sambandh</button>
       <button class="tab" onclick="nav('settings',this)">Settings</button>
     </div>
-    <div class="spacer"></div>
-    <div class="tstat"><b id="h-p">0</b> people · <b id="h-r">0</b> links</div>
+    <div class="tb-space"></div>
+    <div class="tb-stat"><b id="h-p">0</b> log · <b id="h-r">0</b> sambandh</div>
+    <button class="tb-action" onclick="fitTree()">⌂ Fit</button>
   </nav>
 
   <div class="shell">
     <aside class="side">
-      <div class="side-s"><input class="in" placeholder="Search…" oninput="filterSide(this.value)" style="padding:6px 9px;font-size:12px"></div>
-      <div class="side-s"><div class="slabel">People</div><div id="side-list"></div></div>
+      <div class="side-search">
+        <input class="side-sin" placeholder="खोजें / Search…" oninput="filterSide(this.value)">
+      </div>
+      <div class="slabel">परिवार के लोग</div>
+      <div id="side-list"></div>
     </aside>
 
     <div class="canvas">
-      <!-- TREE -->
+
+      <!-- TREE PANEL — card layout -->
       <div class="panel on" id="p-tree">
-        <svg id="svg"><g id="g"></g></svg>
-        <div class="legend">
-          <div class="li"><div class="dot" style="background:#c9935a"></div>You / root</div>
-          <div class="li"><div class="dot" style="background:#8f7ed4"></div>Ancestor</div>
-          <div class="li"><div class="dot" style="background:#5aaa7a"></div>Sibling / cousin</div>
-          <div class="li"><div class="dot" style="background:#5a8fd4"></div>Child</div>
-          <div class="li"><div class="dot" style="background:#d4a05a"></div>Spouse</div>
+        <div id="tree-viewport" style="width:100%;height:100%;overflow:hidden;position:relative">
+          <div id="tree-canvas">
+            <svg id="tree-svg"></svg>
+          </div>
         </div>
-        <div class="tctl">
-          <button class="cbtn" onclick="zIn()">+</button>
-          <button class="cbtn" onclick="zOut()">−</button>
-          <button class="cbtn" onclick="zReset()" style="font-size:11px">⌂</button>
+        <div class="tree-info">
+          <div class="li"><div class="ldot" style="background:#e8792a"></div>आप / You</div>
+          <div class="li"><div class="ldot" style="background:#6c5fc7"></div>पूर्वज / Ancestor</div>
+          <div class="li"><div class="ldot" style="background:#3d8f5f"></div>भाई-बहन / Siblings</div>
+          <div class="li"><div class="ldot" style="background:#2a6fad"></div>संतान / Children</div>
+          <div class="li"><div class="ldot" style="background:#c9935a"></div>जीवनसाथी / Spouse</div>
+        </div>
+        <div class="tree-ctl">
+          <button class="tc-btn" onclick="zIn()">+</button>
+          <button class="tc-btn" onclick="zOut()">−</button>
+          <button class="tc-btn" onclick="fitTree()" style="font-size:11px">⌂</button>
         </div>
       </div>
 
-      <!-- INTERVIEW (owner direct add) -->
+      <!-- INTERVIEW -->
       <div class="panel" id="p-interview">
         <div class="wrap">
-          <div class="eyebrow">Add to your tree</div>
+          <div class="eyebrow">परिवार में जोड़ें</div>
           <div class="ptitle">Add a person</div>
-          <div class="psub">Fill in what you know. The parser extracts everyone mentioned and slots them in. Use this to add yourself, family, or anyone.</div>
+          <div class="psub">Fill in what you know. The AI extracts everyone mentioned and places them correctly using Hindu family relationship terms.</div>
           <div id="iv-form"></div>
           <div class="brow">
-            <button class="btn btn-a" id="parse-btn" onclick="ownerParse()">Parse →</button>
+            <button class="btn btn-a" id="parse-btn" onclick="ownerParse()">Parse with AI →</button>
             <button class="btn btn-s" onclick="fillDemo()">Demo answers</button>
-            <button class="btn btn-s" onclick="clearForm()">Clear</button>
+            <button class="btn btn-s" onclick="clearIvForm()">Clear</button>
           </div>
+          <div class="thinking" id="iv-think"><div class="think-h">विश्लेषण हो रहा है <span class="dots"><span>.</span><span>.</span><span>.</span></span></div><div class="think-log" id="tlog"></div></div>
           <div class="notice" id="iv-notice"></div>
           <div id="iv-result"></div>
         </div>
@@ -245,9 +463,9 @@ textarea.in{resize:vertical;min-height:48px}
       <!-- RESPONSES -->
       <div class="panel" id="p-responses">
         <div class="wrap">
-          <div class="eyebrow">From your invite links</div>
+          <div class="eyebrow">Invite link submissions</div>
           <div class="ptitle">Pending responses</div>
-          <div class="psub">When a relative submits an invite link, it lands here. Process one to parse it and add the people to your shared tree.</div>
+          <div class="psub">When a relative submits an invite link, it appears here. Process it to parse and add them to your tree.</div>
           <div id="resp-list"></div>
           <div class="notice" id="resp-notice"></div>
           <div id="resp-result"></div>
@@ -257,44 +475,46 @@ textarea.in{resize:vertical;min-height:48px}
       <!-- INVITES -->
       <div class="panel" id="p-invites">
         <div class="wrap">
-          <div class="eyebrow">Shareable links</div>
+          <div class="eyebrow">साझा लिंक</div>
           <div class="ptitle">Invite someone</div>
-          <div class="psub">Generate a link, send it to any relative. They open it on their phone, answer, and it feeds straight into your tree.</div>
-          <div class="card"><div class="card-b">
+          <div class="psub">Share a link with any relative. They fill in the form on their phone — their answers save directly to your tree.</div>
+          <div class="icard"><div class="icard-b">
             <div style="display:flex;gap:.5rem;align-items:flex-end">
-              <input class="in" id="inv-label" placeholder="Label — e.g. 'For Uncle Ramesh'">
+              <input class="qin" id="inv-lbl" placeholder="Label — e.g. 'चाचाजी के लिए / For Chacha'" style="min-height:unset;resize:none">
               <button class="btn btn-a" onclick="createInvite()" style="white-space:nowrap">Generate</button>
             </div>
           </div></div>
-          <div class="slabel" style="margin:1rem 0 .625rem">Active links</div>
-          <div id="inv-list"><div class="empty"><div class="ei">🔗</div></div></div>
+          <div class="slabel" style="margin:.75rem 0 .5rem">Active links</div>
+          <div id="inv-list"></div>
         </div>
       </div>
 
       <!-- INSIGHTS -->
       <div class="panel" id="p-insights">
         <div class="wrap">
-          <div class="eyebrow">Patterns</div>
-          <div class="ptitle" style="margin-bottom:1.25rem">Insights</div>
+          <div class="eyebrow">परिवार के पैटर्न</div>
+          <div class="ptitle">Insights</div>
+          <div style="margin-bottom:1.25rem"></div>
           <div class="mgrid" id="m-grid"></div>
           <div class="cgrid" id="c-grid"></div>
         </div>
       </div>
 
-      <!-- CONNECTIONS -->
+      <!-- CONNECT -->
       <div class="panel" id="p-connect">
         <div class="wrap">
-          <div class="eyebrow">Relationship finder</div>
-          <div class="ptitle">How are they connected?</div>
-          <div class="psub">Pick two people. The engine traces the path through your tree and explains the link.</div>
-          <div class="card"><div class="card-b">
+          <div class="eyebrow">सम्बन्ध खोजें</div>
+          <div class="ptitle">Sambandh Finder</div>
+          <div class="psub">Pick two people. The engine traces the exact path and explains your relationship in Hindi family terms.</div>
+          <div class="icard"><div class="icard-b">
             <div class="csel">
-              <div><div class="qtag">Person A</div><select class="in" id="sel-a"></select></div>
+              <div><div class="qtag">Person A</div><select class="qin" id="sel-a" style="min-height:unset;resize:none"></select></div>
               <div class="csep">↔</div>
-              <div><div class="qtag">Person B</div><select class="in" id="sel-b"></select></div>
+              <div><div class="qtag">Person B</div><select class="qin" id="sel-b" style="min-height:unset;resize:none"></select></div>
             </div>
-            <button class="btn btn-a btn-full" onclick="findConn()">Find connection</button>
+            <button class="btn btn-a btn-full" onclick="findConn()">Find Sambandh</button>
           </div></div>
+          <div class="thinking" id="conn-think" style="margin-bottom:1rem"><div class="think-h">रास्ता ढूंढ रहे हैं <span class="dots"><span>.</span><span>.</span><span>.</span></span></div></div>
           <div id="conn-result"></div>
         </div>
       </div>
@@ -302,641 +522,1136 @@ textarea.in{resize:vertical;min-height:48px}
       <!-- SETTINGS -->
       <div class="panel" id="p-settings">
         <div class="wrap">
-          <div class="eyebrow">AI setup</div>
+          <div class="eyebrow">सेटिंग्स</div>
           <div class="ptitle" style="margin-bottom:1.25rem">Settings</div>
-          <div class="card"><div class="card-b">
-            <div class="card-t">AI provider (for parsing answers)</div>
+          <div class="icard"><div class="icard-b">
+            <div class="icard-t">AI Provider</div>
             <div class="pgrid" id="prov-grid">
-              <button class="pbtn on" onclick="setProv('groq',this)">Groq · free</button>
+              <button class="pbtn on" onclick="setProv('groq',this)">Groq · मुफ़्त</button>
               <button class="pbtn" onclick="setProv('gemini',this)">Gemini · free</button>
               <button class="pbtn" onclick="setProv('openai',this)">OpenAI</button>
               <button class="pbtn" onclick="setProv('anthropic',this)">Anthropic</button>
               <button class="pbtn" onclick="setProv('none',this)">No AI · rules</button>
             </div>
-            <div id="key-wrap"><div class="qtag">API key (stays in your browser)</div><input class="in" id="ai-key" type="password" placeholder="paste key" oninput="saveAI()"></div>
-            <div style="margin-top:.625rem"><div class="qtag">Model (optional override)</div><input class="in" id="ai-model" placeholder="default per provider" oninput="saveAI()"></div>
+            <div id="key-wrap">
+              <div class="qtag">API key</div>
+              <input class="qin" id="ai-key" type="password" placeholder="paste key" oninput="saveAI()" style="min-height:unset;resize:none;margin-bottom:.5rem">
+            </div>
+            <div><div class="qtag">Model override (optional)</div>
+              <input class="qin" id="ai-model" placeholder="default per provider" oninput="saveAI()" style="min-height:unset;resize:none">
+            </div>
             <div style="margin-top:.75rem;display:flex;gap:.5rem;align-items:center">
               <button class="btn btn-a" onclick="testAI()">Test</button>
               <span id="ai-test" style="font-size:11px;color:var(--text3)"></span>
             </div>
-            <div class="notice info on" style="margin-top:.75rem">Groq and Gemini both have free tiers — get a key in 2 minutes and pick that provider. With <b>No AI</b>, a built-in rule parser runs (works, but less accurate).</div>
+            <div class="notice info on" style="margin-top:.75rem">
+              <b>Groq</b> and <b>Gemini</b> are free — get a key in 2 min. <b>No AI</b> uses a built-in rule parser (fast but rough).
+            </div>
           </div></div>
-          <div class="card"><div class="card-b">
-            <div class="card-t">Database</div>
+          <div class="icard"><div class="icard-b">
+            <div class="icard-t">Database</div>
             <div style="font-size:12px;color:var(--text2)" id="db-status">Checking…</div>
+            <div style="margin-top:.625rem">
+              <button class="btn btn-s" style="color:var(--red)" onclick="wipeAll()">Clear entire tree</button>
+              <span style="font-size:11px;color:var(--text3);margin-left:.5rem">Removes all people + links.</span>
+            </div>
           </div></div>
         </div>
       </div>
-    </div>
-  </div>
-</div>
 
-<!-- PROFILE -->
+    </div><!-- /canvas -->
+  </div><!-- /shell -->
+</div><!-- /scr-app -->
+
+<!-- PROFILE DRAWER -->
 <div class="poverlay" id="poverlay">
   <div class="ppanel" id="ppanel">
-    <div class="pp-h">
+    <div class="pp-head">
       <button class="pp-x" onclick="closeProfile()">✕</button>
       <div class="pp-av" id="pp-av"></div>
-      <div class="pp-n" id="pp-n"></div>
-      <div class="pp-s" id="pp-s"></div>
+      <div class="pp-name" id="pp-name"></div>
+      <div class="pp-sub" id="pp-sub"></div>
     </div>
-    <div class="pp-b" id="pp-b"></div>
+    <div class="pp-body" id="pp-body"></div>
   </div>
 </div>
 
-<!-- ════════ RESPONDENT (invite link view) ════════ -->
+<!-- ════════ RESPONDENT (invite link) ════════ -->
 <div class="screen" id="scr-respond">
-  <div class="box">
-    <div class="eyebrow" id="rsp-tree">Family Tree</div>
-    <div class="ptitle">You've been invited to share your story</div>
-    <div class="psub">Answer as much or as little as you know — it helps build a shared family record everyone can explore.</div>
-    <div id="rsp-form">
+  <div class="rbox">
+    <div class="rbox-hero">
+      <div class="rbox-tn" id="rsp-tn">Family Tree</div>
+      <div class="ptitle">आपको आमंत्रित किया गया है</div>
+      <div style="font-size:12px;color:var(--text2);margin-top:4px;line-height:1.6">
+        जितना जानते हैं उतना बताएं — यह आपके परिवार की साझा यादों का हिस्सा बनेगा।
+      </div>
+    </div>
+    <div class="rbox-form" id="rsp-form">
       <div id="rsp-fields"></div>
-      <button class="btn btn-a btn-full" id="rsp-submit" style="margin-top:1rem" onclick="submitResponse()">Submit my answers →</button>
+      <button class="btn btn-a btn-full" id="rsp-submit" onclick="submitResponse()">Submit →</button>
       <div class="notice" id="rsp-notice"></div>
     </div>
-    <div class="thanks" id="rsp-thanks">
-      <div style="font-size:40px;margin-bottom:.75rem">🙏</div>
-      <div class="ptitle">Thank you!</div>
-      <div class="psub" style="margin:0 auto">Your answers were saved. They'll be added to the family tree.</div>
+    <div class="thanks" id="rsp-thanks" style="display:none">
+      <div style="font-size:42px;margin-bottom:.75rem">🙏</div>
+      <div class="ptitle">धन्यवाद!</div>
+      <div style="font-size:13px;color:var(--text2);margin-top:6px">आपके उत्तर सुरक्षित हो गए हैं।</div>
     </div>
   </div>
 </div>
 
 <script>
-// ════════════════════════════════════════════════════════════════
-//  ⚙️  CONFIG — paste your Supabase details here, then re-deploy
-// ════════════════════════════════════════════════════════════════
-const CONFIG = {
-  SUPABASE_URL:  'https://njpvyqbmfhpzrpypoaaz.supabase.co',       // e.g. https://abcd.supabase.co
-  SUPABASE_KEY:  'sb_publishable_YbsqWeQKad1Ry-PCAdhcTA_1BsZEV10',  // the "anon public" key
-  TREE_NAME:     'Tiwari Family',            // shown in the header
-  ROOT_PERSON:   'Satyam Tiwari',                   // who counts as "you" (gold node)
+// ════════════════════════════════════════════════════════
+//  CONFIG — filled from setup screen or localStorage
+// ════════════════════════════════════════════════════════
+let CFG = { sbUrl:'', sbKey:'', treeName:'Parivaar', rootPerson:'', treeId:null, demo:false };
+
+// ════════════════════════════════════════════════════════
+//  INDIAN HINDU RELATIONSHIP SYSTEM
+// ════════════════════════════════════════════════════════
+const HINDU_RELS = {
+  // Father side
+  'PARENT_OF:male:father':    'पिता (Pita)',
+  'PARENT_OF:female:mother':  'माता (Mata)',
+  'GRANDPARENT:male:pat':     'दादाजी (Dada)',
+  'GRANDPARENT:female:pat':   'दादीजी (Dadi)',
+  'GRANDPARENT:male:mat':     'नानाजी (Nana)',
+  'GRANDPARENT:female:mat':   'नानीजी (Nani)',
+  // Siblings
+  'SIBLING:male:older':       'बड़े भाई (Bade Bhai)',
+  'SIBLING:male:younger':     'छोटे भाई (Chote Bhai)',
+  'SIBLING:female:older':     'दीदी (Didi)',
+  'SIBLING:female:younger':   'छोटी बहन (Choti Bahan)',
+  // Spouse
+  'SPOUSE:male':              'पति (Pati)',
+  'SPOUSE:female':            'पत्नी (Patni)',
+  // Children
+  'CHILD:male':               'पुत्र (Putra / Beta)',
+  'CHILD:female':             'पुत्री (Putri / Beti)',
+  // Father's siblings
+  'UNCLE:pat:older':          'ताऊजी (Tau)',
+  'UNCLE:pat:younger':        'चाचाजी (Chacha)',
+  'AUNT:pat:older':           'ताईजी (Tai)',
+  'AUNT:pat:younger':         'चाचीजी (Chachi)',
+  // Mother's siblings
+  'UNCLE:mat':                'मामाजी (Mama)',
+  'AUNT:mat':                 'मामीजी (Mami)',
+  // Father's sisters
+  'AUNT:pat:sister':          'बुआजी (Bua)',
+  'UNCLE:pat:sister-h':       'फूफाजी (Fufa)',
+  // Mother's sisters
+  'AUNT:mat:sister':          'मौसीजी (Mausi)',
+  'UNCLE:mat:sister-h':       'मौसाजी (Mausa)',
+  // Cousins
+  'COUSIN:male':              'चचेरे/ममेरे भाई',
+  'COUSIN:female':            'चचेरी/ममेरी बहन',
+  // Niece/nephew
+  'NEPHEW':                   'भतीजा / भांजा',
+  'NIECE':                    'भतीजी / भांजी',
+  // In-laws
+  'INLAW:father':             'ससुरजी (Sasur)',
+  'INLAW:mother':             'सासुजी (Saas)',
+  'INLAW:brother':            'देवर / जेठ',
+  'INLAW:sister':             'ननद / भाभी',
+  'INLAW:son':                'दामाद (Damaad)',
+  'INLAW:daughter':           'बहू (Bahu)',
+  // Grandchildren
+  'GRANDCHILD:male:son':      'पोता (Pota)',
+  'GRANDCHILD:female:son':    'पोती (Poti)',
+  'GRANDCHILD:male:daughter': 'नाती (Nati)',
+  'GRANDCHILD:female:daughter':'नातिन (Natin)',
 };
-// ════════════════════════════════════════════════════════════════
 
-const QUESTIONS = [
-  ['q1','Full name & nicknames','My full name is…'],
-  ['q2','Birth year, birthplace, where they grew up','Born in 1962 in Basahi village near Prayagraj…'],
-  ['q3','Occupation / profession','Government school teacher for 28 years…'],
-  ['q4','Parents — names, origins, alive/deceased','Father Shivram Tiwari, farmer, passed 1998. Mother Savitri Devi, alive…'],
-  ['q5','Grandparents (paternal & maternal if known)','Paternal grandfather Harishankar Tiwari…'],
-  ['q6','Brothers & sisters','Elder brother Suresh, younger brother Mahesh…'],
-  ['q7','Spouse & children','Married Sunita in 1988. Son Ankit born 1991…'],
-  ['q8','Shared relatives with the inviter','Shivani is my brother Suresh\'s daughter…'],
-  ['q9','Any other relatives to add','Cousin Devendra Tiwari in Lucknow…'],
-];
+// Simple relationship phrase for display
+function hinduRelPhrase(relType, gender, context) {
+  if (!relType) return '';
+  const t = relType.toUpperCase();
+  const g = (gender||'unknown').toLowerCase();
+  if (t.includes('SPOUSE')) return g==='male' ? 'पति (Husband)' : g==='female' ? 'पत्नी (Wife)' : 'जीवनसाथी (Spouse)';
+  if (t.includes('PARENT')) return g==='male' ? 'पिता (Pita)' : g==='female' ? 'माता (Mata)' : 'माता-पिता';
+  if (t.includes('CHILD')) return g==='male' ? 'पुत्र (Beta)' : g==='female' ? 'पुत्री (Beti)' : 'संतान';
+  if (t.includes('SIBLING')) return g==='male' ? 'भाई (Bhai)' : g==='female' ? 'बहन (Bahan)' : 'भाई-बहन';
+  if (t.includes('GRAND')) return g==='male' ? 'दादाजी/नानाजी' : g==='female' ? 'दादीजी/नानीजी' : 'दादा-नाना';
+  return relType.toLowerCase().replace(/_/g,' ');
+}
 
-let STATE = { people:{}, rels:[], invites:[], pending:[], demo:false,
-  aiProvider:'groq', aiKey:'', aiModel:'' };
-let sim, zoom, parseResult=null, respInvite=null;
+// Card relationship label (shown on card under name)
+function cardRelLabel(person, rootId) {
+  if (!rootId || person.id === rootId) return '';
+  const myRels = STATE.rels.filter(r => r.from_id === person.id || r.to_id === person.id);
+  const rootRels = myRels.filter(r => r.from_id === rootId || r.to_id === rootId);
+  if (rootRels.length) {
+    const r = rootRels[0]; const isFrom = r.from_id === person.id;
+    const t = (r.type||'').toUpperCase(); const g = person.gender||'unknown';
+    if (t.includes('SPOUSE')) return g==='male'?'पति':'पत्नी';
+    if (t.includes('PARENT')) return isFrom ? (g==='male'?'पिताजी':'माताजी') : (g==='male'?'पुत्र':'पुत्री');
+    if (t.includes('SIBLING')) return g==='male'?'भाई':'बहन';
+    if (t.includes('CHILD')) return isFrom ? (g==='male'?'पुत्र':'पुत्री') : (g==='male'?'पिताजी':'माताजी');
+  }
+  // trace one hop
+  for (const mr of myRels) {
+    const mid = mr.from_id === person.id ? mr.to_id : mr.from_id;
+    const midP = STATE.people[mid]; if (!midP) continue;
+    const midRels = STATE.rels.filter(r2 => (r2.from_id===mid||r2.to_id===mid) && (r2.from_id===rootId||r2.to_id===rootId));
+    if (!midRels.length) continue;
+    const r1 = mr; const r2 = midRels[0];
+    const t1 = (r1.type||'').toUpperCase(); const t2 = (r2.type||'').toUpperCase();
+    const isParentOfRoot = (r2.from_id===mid && t2.includes('PARENT')) || (r2.to_id===mid && t2.includes('CHILD'));
+    const g = person.gender||'unknown';
+    if (isParentOfRoot) {
+      if (t1.includes('SIBLING')) return g==='male'?'चाचाजी/ताऊजी':'चाचीजी/बुआ';
+      if (t1.includes('SPOUSE')) return g==='male'?'दादाजी/नानाजी':'दादीजी/नानीजी';
+    }
+    if (t1.includes('PARENT') && t2.includes('SIBLING')) return g==='male'?'भतीजा/भांजा':'भतीजी/भांजी';
+    if (t1.includes('PARENT') && t2.includes('CHILD')) return g==='male'?'पोता/नाती':'पोती/नातिन';
+  }
+  return '';
+}
 
-const configured = () => CONFIG.SUPABASE_URL.startsWith('http') && CONFIG.SUPABASE_KEY.length>20;
+// ════════════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════════════
+let STATE = {
+  people:{}, rels:[], invites:[], pending:[],
+  aiProvider:'groq', aiKey:'', aiModel:''
+};
+let parseResult=null, respInvite=null;
+let treeZoom=1, treeX=0, treeY=0, isDragging=false, dragStartX=0, dragStartY=0;
 
-// ── boot / routing ──
-(function(){
+// ════════════════════════════════════════════════════════
+//  BOOT
+// ════════════════════════════════════════════════════════
+(function boot(){
   const tok = new URLSearchParams(location.search).get('invite');
   loadAI();
   if (tok) return initRespond(tok);
-  if (!configured()) return show('scr-setup');
-  startApp();
+  const saved = localStorage.getItem('ft_cfg');
+  if (saved) { try { const c=JSON.parse(saved); Object.assign(CFG,c); if(CFG.sbUrl||CFG.demo){startApp();return;} }catch(e){} }
+  show('scr-setup');
 })();
 
-function startDemo(){ STATE.demo=true; seedDemo(); startApp(); }
+// ════════════════════════════════════════════════════════
+//  SETUP
+// ════════════════════════════════════════════════════════
+async function createSession(){
+  const root=document.getElementById('cfg-root').value.trim();
+  const tree=document.getElementById('cfg-tree').value.trim();
+  const sbUrl=document.getElementById('cfg-sburl').value.trim().replace(/\/$/,'');
+  const sbKey=document.getElementById('cfg-sbkey').value.trim();
+  if(!root||!tree){return smsg('err','Enter your name and a tree name.');}
+  if(!sbUrl||!sbKey){return smsg('err','Enter Supabase URL and key — or click "Try with demo data".');}
+  smsg('info','Connecting…');
+  CFG={sbUrl,sbKey,treeName:tree,rootPerson:root,demo:false};
+  try{
+    const rows=await sbPost('trees',{name:tree,owner_name:root});
+    CFG.treeId=rows[0].id;
+    localStorage.setItem('ft_cfg',JSON.stringify(CFG));
+    startApp();
+  }catch(e){ smsg('err','Error: '+e.message); }
+}
+function demoMode(){
+  CFG={sbUrl:'',sbKey:'',treeName:'Tiwari Parivaar',rootPerson:'Satyam Tiwari',demo:true,treeId:'demo'};
+  localStorage.setItem('ft_cfg',JSON.stringify(CFG));
+  seedDemo(); startApp();
+}
+function smsg(type,msg){const e=document.getElementById('setup-msg');e.className='smsg '+type;e.textContent=msg;}
 
 async function startApp(){
   show('scr-app');
-  document.getElementById('t-name').textContent = CONFIG.TREE_NAME;
-  buildForm('iv-form','');
+  document.getElementById('tb-name').textContent=CFG.treeName;
+  buildIvForm('iv-form');
   renderProviders();
   await loadAll();
-  document.getElementById('db-status').textContent = STATE.demo
-    ? 'Demo mode — data is local to this browser only.'
-    : '✓ Connected to Supabase.';
+  document.getElementById('db-status').textContent=CFG.demo?'Demo mode — localStorage only.':'✓ Connected to Supabase.';
 }
 
-// ── Supabase REST ──
-async function api(method, path, body){
-  if (STATE.demo) return demoApi(method, path, body);
-  const r = await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/${path}`,{
-    method, headers:{ apikey:CONFIG.SUPABASE_KEY, Authorization:`Bearer ${CONFIG.SUPABASE_KEY}`,
-      'Content-Type':'application/json', Prefer:'return=representation' },
-    body: body?JSON.stringify(body):undefined });
+// ════════════════════════════════════════════════════════
+//  SUPABASE
+// ════════════════════════════════════════════════════════
+async function sbGet(table,q=''){ return sb('GET',table,null,q); }
+async function sbPost(table,body){ return sb('POST',table,body); }
+async function sbPatch(table,q,body){ return sb('PATCH',table,body,q); }
+async function sbDel(table,q){ return sb('DELETE',table,null,q); }
+
+async function sb(method,table,body,q=''){
+  if(CFG.demo) return demoSB(method,table,body,q);
+  const url=`${CFG.sbUrl}/rest/v1/${table}${q}`;
+  const r=await fetch(url,{method,headers:{
+    apikey:CFG.sbKey,Authorization:`Bearer ${CFG.sbKey}`,
+    'Content-Type':'application/json',Prefer:'return=representation'},
+    body:body?JSON.stringify(body):undefined});
   if(!r.ok) throw new Error((await r.text()).slice(0,120));
-  const t = await r.text(); return t?JSON.parse(t):[];
+  const t=await r.text(); return t?JSON.parse(t):[];
 }
-function demoApi(method, path, body){
-  const tbl = path.split('?')[0]; const k='ftd_'+tbl;
-  let d = JSON.parse(localStorage.getItem(k)||'[]');
+
+function demoSB(method,table,body,q){
+  const k='ftd_'+table; let d=JSON.parse(localStorage.getItem(k)||'[]');
   if(method==='GET') return d;
-  if(method==='POST'){ const row={id:crypto.randomUUID(),created_at:new Date().toISOString(),...body}; d.push(row); localStorage.setItem(k,JSON.stringify(d)); return [row]; }
-  if(method==='PATCH'){ const id=path.match(/id=eq\.([^&]+)/)?.[1]; d=d.map(x=>x.id===id?{...x,...body}:x); localStorage.setItem(k,JSON.stringify(d)); return d; }
-  if(method==='DELETE'){ const id=path.match(/id=eq\.([^&]+)/)?.[1]; d=d.filter(x=>x.id!==id); localStorage.setItem(k,JSON.stringify(d)); return []; }
+  if(method==='POST'){const row={id:crypto.randomUUID(),created_at:new Date().toISOString(),...body};d.push(row);localStorage.setItem(k,JSON.stringify(d));return[row];}
+  if(method==='PATCH'){const id=q.match(/id=eq\.([^&]+)/)?.[1];d=d.map(x=>x.id===id?{...x,...body}:x);localStorage.setItem(k,JSON.stringify(d));return d;}
+  if(method==='DELETE'){const id=q.match(/id=eq\.([^&]+)/)?.[1];if(id)d=d.filter(x=>x.id!==id);else d=[];localStorage.setItem(k,JSON.stringify(d));return[];}
   return d;
 }
 
 async function loadAll(){
   try{
-    const [people,rels,invites,pending] = await Promise.all([
-      api('GET','people?select=*&order=created_at.asc'),
-      api('GET','relationships?select=*'),
-      api('GET','invites?select=*&order=created_at.desc'),
-      api('GET','interviews?select=*&status=eq.pending&order=created_at.desc'),
+    const q=CFG.demo?'':`?tree_id=eq.${CFG.treeId}`;
+    const[people,rels,invites,pending]=await Promise.all([
+      sbGet('people',q+'&order=created_at.asc'),
+      sbGet('relationships',q),
+      sbGet('invites',q+'&order=created_at.desc'),
+      sbGet('interviews',q+'&status=eq.pending&order=created_at.desc'),
     ]);
     STATE.people={}; people.forEach(p=>STATE.people[p.id]=p);
     STATE.rels=rels; STATE.invites=invites; STATE.pending=pending;
     refresh();
-  }catch(e){ console.error(e); document.getElementById('db-status') && (document.getElementById('db-status').textContent='⚠ '+e.message); }
+  }catch(e){console.error(e); document.getElementById('db-status').textContent='⚠ '+e.message;}
 }
 
 function refresh(){
-  const pc=Object.keys(STATE.people).length, rc=STATE.rels.length;
+  const pc=Object.keys(STATE.people).length,rc=STATE.rels.length;
   set('h-p',pc); set('h-r',rc);
-  document.getElementById('resp-dot').textContent = STATE.pending.length?`(${STATE.pending.length})`:'';
-  renderSide(); buildTree(); renderInvites(); renderResponses(); renderInsights(); fillSelects();
+  document.getElementById('resp-dot').textContent=STATE.pending.length?`(${STATE.pending.length})`:'';
+  renderSide(); buildCardTree(); renderInvites(); renderResponses(); renderInsights(); fillSelects();
 }
 
-// ── nav ──
+// ════════════════════════════════════════════════════════
+//  NAV
+// ════════════════════════════════════════════════════════
 function nav(name,btn){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));
   document.getElementById('p-'+name).classList.add('on'); btn.classList.add('on'); closeProfile();
 }
 
-// ── sidebar ──
+// ════════════════════════════════════════════════════════
+//  SIDEBAR
+// ════════════════════════════════════════════════════════
 function renderSide(filter=''){
   const all=Object.values(STATE.people);
   const list=filter?all.filter(p=>(p.full_name||'').toLowerCase().includes(filter.toLowerCase())):all;
   const el=document.getElementById('side-list');
-  if(!list.length){ el.innerHTML=`<div style="font-size:11px;color:var(--text3);padding:4px 8px">${all.length?'No matches':'No people yet'}</div>`; return; }
-  el.innerHTML=list.map(p=>{const c=color(p);return `<div class="prow" onclick="openProfile('${p.id}')">
-    <div class="av" style="background:${c}22;color:${c}">${initials(p.full_name)}</div>
+  if(!list.length){el.innerHTML=`<div style="font-size:11px;color:var(--text3);padding:6px .75rem">${all.length?'No matches':'No people yet'}</div>`;return;}
+  el.innerHTML=list.map(p=>{const c=nodeColor(p);return`<div class="prow" onclick="openProfile('${p.id}')">
+    <div class="pav" style="background:${c}22;color:${c}">${initials(p.full_name)}</div>
     <div style="min-width:0"><div class="pn">${esc(p.full_name)}</div><div class="pm">${p.birth_year||''}${p.birth_year&&p.birth_place?' · ':''}${esc(p.birth_place||'')}</div></div>
   </div>`;}).join('');
 }
-function filterSide(v){ renderSide(v); }
+function filterSide(v){renderSide(v);}
 
-// ── generational layout ──
-function genDelta(type){
-  const t=(type||'').toUpperCase();
-  if(t.includes('GRANDPARENT')) return 2;
-  if(t.includes('PARENT')) return 1;     // PARENT_OF: from=parent, to=child
-  if(t.includes('CHILD')) return -1;     // CHILD_OF: from=child, to=parent
-  if(t.includes('UNCLE')||t.includes('AUNT')) return 1; // from=uncle/aunt, to=niece/nephew
-  return 0; // SIBLING_OF, SPOUSE_OF, COUSIN_OF, OTHER — same generation
-}
-function computeLayout(){
-  const people=Object.values(STATE.people); const ids=people.map(p=>p.id);
-  const root=people.find(p=>norm(p.full_name)===norm(CONFIG.ROOT_PERSON))||people[0];
-  const gen={}; const queue=[];
-  if(root){ gen[root.id]=0; queue.push(root.id); }
-  while(queue.length){
-    const cur=queue.shift();
-    STATE.rels.forEach(r=>{
-      if(r.from_id===cur && STATE.people[r.to_id] && !(r.to_id in gen)){ gen[r.to_id]=gen[cur]+genDelta(r.type); queue.push(r.to_id); }
-      if(r.to_id===cur && STATE.people[r.from_id] && !(r.from_id in gen)){ gen[r.from_id]=gen[cur]-genDelta(r.type); queue.push(r.from_id); }
-    });
-  }
-  ids.forEach(id=>{ if(!(id in gen)) gen[id]=0; });
-  const levels={}; ids.forEach(id=>{ (levels[gen[id]]=levels[gen[id]]||[]).push(id); });
-  const spacingX=108, spacingY=128, posX={};
-  Object.keys(levels).map(Number).sort((a,b)=>a-b).forEach(level=>{
-    const nodeIds=levels[level];
-    const anchored=nodeIds.map(id=>{
-      const up=STATE.rels.filter(r=>r.to_id===id && gen[r.from_id]===level-1 && genDelta(r.type)>0 && posX[r.from_id]!==undefined);
-      const anchor=up.length? up.reduce((s,r)=>s+posX[r.from_id],0)/up.length : null;
-      return {id,anchor};
-    });
-    anchored.sort((a,b)=>{
-      if(a.anchor==null&&b.anchor==null) return (STATE.people[a.id].full_name||'').localeCompare(STATE.people[b.id].full_name||'');
-      if(a.anchor==null) return 1; if(b.anchor==null) return -1; return a.anchor-b.anchor;
-    });
-    for(let i=0;i<anchored.length-1;i++){
-      const sp=STATE.rels.find(r=>(r.from_id===anchored[i].id||r.to_id===anchored[i].id)&&(r.type||'').toUpperCase().includes('SPOUSE'));
-      if(sp){ const sId=sp.from_id===anchored[i].id?sp.to_id:sp.from_id; const j=anchored.findIndex(x=>x.id===sId);
-        if(j>i+1){ const [it]=anchored.splice(j,1); anchored.splice(i+1,0,it); } }
-    }
-    const n=anchored.length; anchored.forEach((a,i)=>{ posX[a.id]=(i-(n-1)/2)*spacingX; });
-  });
-  const pos={}; ids.forEach(id=>{ pos[id]={x:posX[id]||0,y:gen[id]*spacingY}; }); return pos;
-}
+// ════════════════════════════════════════════════════════
+//  CARD-BASED HIERARCHICAL TREE — Image 1 style
+// ════════════════════════════════════════════════════════
+const CW=120, CH=148, GAPX=44, GAPY=88;
 
-// ── D3 tree (generational, fixed layout — pan/zoom + light drag) ──
-let fitTransform=null;
-function buildTree(){
-  const svg=d3.select('#svg'), g=svg.select('#g'); g.selectAll('*').remove();
+function computeGens(){
   const people=Object.values(STATE.people);
-  const W=svg.node().clientWidth||900, H=svg.node().clientHeight||650;
+  const adj={};
+  people.forEach(p=>{adj[p.id]=[];});
+  STATE.rels.forEach(r=>{
+    const t=(r.type||'').toUpperCase();
+    if(!adj[r.from_id]||!adj[r.to_id])return;
+    if(t.includes('PARENT')){adj[r.from_id].push({id:r.to_id,off:1});adj[r.to_id].push({id:r.from_id,off:-1});}
+    else if(t.includes('CHILD')){adj[r.from_id].push({id:r.to_id,off:-1});adj[r.to_id].push({id:r.from_id,off:1});}
+    else if(t.includes('GRAND')){adj[r.from_id].push({id:r.to_id,off:2});adj[r.to_id].push({id:r.from_id,off:-2});}
+    else if(t.includes('SPOUSE')||t.includes('SIBLING')){adj[r.from_id].push({id:r.to_id,off:0});adj[r.to_id].push({id:r.from_id,off:0});}
+  });
+  // BFS from root or first person
+  const root=Object.values(STATE.people).find(p=>norm(p.full_name)===norm(CFG.rootPerson))||Object.values(STATE.people)[0];
+  const gen={};
+  if(root){
+    gen[root.id]=0;
+    const q=[root.id];
+    while(q.length){
+      const u=q.shift();
+      (adj[u]||[]).forEach(({id,off})=>{if(gen[id]==null){gen[id]=(gen[u]||0)+off;q.push(id);}});
+    }
+  }
+  people.forEach(p=>{if(gen[p.id]==null)gen[p.id]=0;});
+  // shift so min is 0
+  const mn=Math.min(0,...Object.values(gen));
+  Object.keys(gen).forEach(k=>gen[k]-=mn);
+  return gen;
+}
+
+function buildCardTree(){
+  const viewport=document.getElementById('tree-viewport');
+  const canvas=document.getElementById('tree-canvas');
+  const svg=document.getElementById('tree-svg');
+  // remove old cards but keep svg
+  Array.from(canvas.children).forEach(c=>{if(c!==svg)c.remove();});
+  svg.innerHTML='';
+
+  const people=Object.values(STATE.people);
   if(!people.length){
-    g.append('text').attr('x',W/2).attr('y',H/2-14).attr('text-anchor','middle').attr('fill','rgba(255,255,255,.12)').attr('font-size','38px').text('🌳');
-    g.append('text').attr('x',W/2).attr('y',H/2+20).attr('text-anchor','middle').attr('fill','rgba(255,255,255,.2)').attr('font-size','13px').text('No people yet — use “Add person” to start');
+    canvas.style.width='100%'; canvas.style.height='100%';
+    canvas.innerHTML='<svg id="tree-svg"></svg><div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text3);gap:.5rem"><div style="font-size:36px;opacity:.25">🌳</div><div style="font-size:13px">No people yet — use Add person</div></div>';
+    treeZoom=1;treeX=0;treeY=0;
     return;
   }
-  const pos=computeLayout();
-  const nodes=people.map(p=>({...p,_c:color(p),x:pos[p.id]?.x||0,y:pos[p.id]?.y||0}));
-  const byId={}; nodes.forEach(n=>byId[n.id]=n);
-  const links=STATE.rels.filter(r=>byId[r.from_id]&&byId[r.to_id]).map(r=>({source:byId[r.from_id],target:byId[r.to_id],type:r.type}));
 
-  const link=g.append('g').selectAll('line').data(links).join('line')
-    .attr('x1',d=>d.source.x).attr('y1',d=>d.source.y).attr('x2',d=>d.target.x).attr('y2',d=>d.target.y)
-    .attr('stroke','rgba(255,255,255,.13)').attr('stroke-width',1.4)
-    .attr('stroke-dasharray',d=>(d.type||'').toUpperCase().includes('SPOUSE')?'4 3':null);
+  const gen=computeGens();
+  const maxGen=Math.max(...Object.values(gen));
 
-  const node=g.append('g').selectAll('g').data(nodes).join('g')
-    .attr('transform',d=>`translate(${d.x},${d.y})`).style('cursor','pointer')
-    .call(d3.drag()
-      .on('start', function(e,d){ d._dragging=true; })
-      .on('drag', function(e,d){
-        const k=d3.zoomTransform(svg.node()).k;
-        d.x+=e.dx/k; d.y+=e.dy/k;
-        d3.select(this).attr('transform',`translate(${d.x},${d.y})`);
-        link.filter(l=>l.source.id===d.id||l.target.id===d.id)
-          .attr('x1',l=>l.source.x).attr('y1',l=>l.source.y).attr('x2',l=>l.target.x).attr('y2',l=>l.target.y);
-      })
-      .on('end', function(e,d){ d._dragging=false; }))
-    .on('click',(e,d)=>{ if(!d._dragging){ e.stopPropagation(); openProfile(d.id); } });
-  node.append('circle').attr('r',18).attr('fill',d=>d._c+'22').attr('stroke',d=>d._c).attr('stroke-width',1.5);
-  node.append('text').attr('text-anchor','middle').attr('dy','.35em').attr('font-size','9px').attr('font-weight','700').attr('fill',d=>d._c).style('pointer-events','none').text(d=>initials(d.full_name));
-  node.append('text').attr('text-anchor','middle').attr('dy','2.2em').attr('font-size','8px').attr('fill','rgba(255,255,255,.3)').style('pointer-events','none').text(d=>(d.full_name||'').split(' ')[0]);
+  // Group by generation, determine X positions
+  const genGroups={};
+  people.forEach(p=>{const g=gen[p.id];(genGroups[g]=genGroups[g]||[]).push(p);});
 
-  const xs=nodes.map(n=>n.x), ys=nodes.map(n=>n.y);
-  const minX=Math.min(...xs), maxX=Math.max(...xs), minY=Math.min(...ys), maxY=Math.max(...ys);
-  const tw=Math.max(maxX-minX,1), th=Math.max(maxY-minY,1);
-  const scale=Math.min(1.3,(W-100)/tw,(H-100)/th)||1;
-  const tx=W/2-(minX+maxX)/2*scale, ty=H/2-(minY+maxY)/2*scale;
-  fitTransform=d3.zoomIdentity.translate(tx,ty).scale(Math.max(scale,.25));
-  zoom=d3.zoom().scaleExtent([.15,3]).on('zoom',e=>g.attr('transform',e.transform));
-  svg.call(zoom).call(zoom.transform,fitTransform).on('click',()=>closeProfile());
+  // Sort within generations: put spouses adjacent, parents over children
+  Object.values(genGroups).forEach(grp=>{
+    grp.sort((a,b)=>{
+      const aRel=STATE.rels.find(r=>(r.from_id===a.id||r.to_id===a.id)&&(r.type||'').includes('SPOUSE'));
+      const bRel=STATE.rels.find(r=>(r.from_id===b.id||r.to_id===b.id)&&(r.type||'').includes('SPOUSE'));
+      return (aRel?0:1)-(bRel?0:1);
+    });
+  });
+
+  const pos={};
+  const totalWidth={};
+
+  Object.entries(genGroups).forEach(([g,grp])=>{
+    const n=grp.length;
+    const totalW=n*CW+(n-1)*GAPX;
+    totalWidth[g]=totalW;
+    const startX=0;
+    grp.forEach((p,i)=>{pos[p.id]={x:startX+i*(CW+GAPX), y:parseInt(g)*(CH+GAPY)};});
+  });
+
+  // Center each generation horizontally relative to max width
+  const maxW=Math.max(...Object.values(totalWidth),CW);
+  Object.entries(genGroups).forEach(([g,grp])=>{
+    const tw=totalWidth[g];
+    const offset=(maxW-tw)/2;
+    grp.forEach(p=>{pos[p.id].x+=offset;});
+  });
+
+  // Total canvas size
+  const canvasW=maxW+120;
+  const canvasH=(maxGen+1)*(CH+GAPY)+80;
+  canvas.style.width=canvasW+'px';
+  canvas.style.height=canvasH+'px';
+  svg.style.width=canvasW+'px';
+  svg.style.height=canvasH+'px';
+  svg.setAttribute('viewBox',`0 0 ${canvasW} ${canvasH}`);
+
+  // Draw SVG connectors FIRST
+  const rootPerson=Object.values(STATE.people).find(p=>norm(p.full_name)===norm(CFG.rootPerson));
+
+  // Parent→child connectors (elbow style, Image 1)
+  const childRels=STATE.rels.filter(r=>{
+    const t=(r.type||'').toUpperCase();
+    return t.includes('PARENT') && pos[r.from_id] && pos[r.to_id];
+  });
+
+  // Group children by parent pair
+  const childGroups={};
+  childRels.forEach(r=>{
+    const child=r.to_id;
+    if(!childGroups[child])childGroups[child]=[];
+    childGroups[child].push(r.from_id);
+  });
+
+  Object.entries(childGroups).forEach(([childId,parentIds])=>{
+    if(!pos[childId])return;
+    const childPos=pos[childId];
+    const childCX=childPos.x+CW/2;
+    const childTop=childPos.y;
+    const parentCXs=parentIds.filter(id=>pos[id]).map(id=>pos[id].x+CW/2);
+    if(!parentCXs.length)return;
+    const parentCX=parentCXs.reduce((a,b)=>a+b,0)/parentCXs.length;
+    const parentY=Math.max(...parentIds.filter(id=>pos[id]).map(id=>pos[id].y))+CH;
+    const midY=(parentY+childTop)/2;
+    const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d',`M ${parentCX} ${parentY} V ${midY} H ${childCX} V ${childTop}`);
+    path.setAttribute('class','connector');
+    svg.appendChild(path);
+  });
+
+  // Spouse connectors
+  const seenSpouse=new Set();
+  STATE.rels.filter(r=>(r.type||'').toUpperCase().includes('SPOUSE')).forEach(r=>{
+    const k=[r.from_id,r.to_id].sort().join('|');
+    if(seenSpouse.has(k))return; seenSpouse.add(k);
+    if(!pos[r.from_id]||!pos[r.to_id])return;
+    const a=pos[r.from_id], b=pos[r.to_id];
+    const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1',a.x+CW); line.setAttribute('y1',a.y+CH/2);
+    line.setAttribute('x2',b.x); line.setAttribute('y2',b.y+CH/2);
+    line.setAttribute('class','connector connector-spouse');
+    svg.appendChild(line);
+  });
+
+  // Sibling connectors
+  const seenSib=new Set();
+  STATE.rels.filter(r=>(r.type||'').toUpperCase().includes('SIBLING')).forEach(r=>{
+    const k=[r.from_id,r.to_id].sort().join('|');
+    if(seenSib.has(k))return; seenSib.add(k);
+    if(!pos[r.from_id]||!pos[r.to_id])return;
+    const a=pos[r.from_id], b=pos[r.to_id];
+    const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1',a.x+CW); line.setAttribute('y1',a.y+30);
+    line.setAttribute('x2',b.x); line.setAttribute('y2',b.y+30);
+    line.setAttribute('class','connector connector-sibling');
+    svg.appendChild(line);
+  });
+
+  // Draw person CARDS
+  people.forEach(p=>{
+    if(!pos[p.id])return;
+    const {x,y}=pos[p.id];
+    const isRoot=rootPerson&&p.id===rootPerson.id;
+    const c=nodeColor(p);
+    const relLabel=cardRelLabel(p, rootPerson?.id||null);
+    const gender=(p.gender||'unknown').toLowerCase();
+    const genderIcon=gender==='male'?'♂':gender==='female'?'♀':'';
+    const genderColor=gender==='male'?'#2a6fad':gender==='female'?'#c0427a':'#888';
+
+    const card=document.createElement('div');
+    card.className='pcard'+(isRoot?' root-card':'');
+    card.style.left=x+'px';
+    card.style.top=y+'px';
+    card.dataset.id=p.id;
+
+    const yrsStr=p.birth_year?(p.is_deceased?(p.birth_year+'–†'):(p.birth_year+'–')):'';
+
+    card.innerHTML=`
+      <div class="pcard-photo" style="background:linear-gradient(135deg,${c}18 0%,${c}08 100%)">
+        <div class="pcard-avatar" style="background:${c}">
+          ${initials(p.full_name)}
+          ${genderIcon?`<div class="pcard-gender-icon" style="background:${genderColor};color:#fff">${genderIcon}</div>`:''}
+        </div>
+      </div>
+      <div class="pcard-body">
+        <div class="pcard-name" title="${esc(p.full_name)}">${esc(p.full_name)}</div>
+        ${relLabel?`<div class="pcard-rel">${esc(relLabel)}</div>`:''}
+        ${yrsStr?`<div class="pcard-years">${yrsStr}</div>`:'<div class="pcard-years" style="opacity:0">·</div>'}
+      </div>`;
+
+    card.addEventListener('click',(e)=>{e.stopPropagation();openProfile(p.id);});
+    canvas.appendChild(card);
+  });
+
+  // Fit to view
+  applyTransform();
+  fitTree();
+
+  // Pan/zoom setup
+  setupPanZoom();
 }
-function zIn(){ d3.select('#svg').transition().call(zoom?.scaleBy,1.4); }
-function zOut(){ d3.select('#svg').transition().call(zoom?.scaleBy,.72); }
-function zReset(){ d3.select('#svg').transition().call(zoom?.transform,fitTransform||d3.zoomIdentity); }
 
-// ── profile ──
-function openProfile(id){
-  const p=STATE.people[id]; if(!p)return; const c=color(p);
-  const av=document.getElementById('pp-av'); av.textContent=initials(p.full_name);
-  av.style.cssText=`background:${c}22;color:${c};width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700`;
-  set('pp-n',p.full_name||'—'); set('pp-s',[p.occupation,p.birth_place].filter(Boolean).join(' · ')||'');
-  const my=STATE.rels.filter(r=>r.from_id===id||r.to_id===id);
-  document.getElementById('pp-b').innerHTML=
-    (p.birth_year?`<div class="pp-r"><span class="pp-k">Born</span><span class="pp-v">${p.birth_year}${p.birth_place?' in '+esc(p.birth_place):''}</span></div>`:'')+
-    (p.current_location?`<div class="pp-r"><span class="pp-k">Lives</span><span class="pp-v">${esc(p.current_location)}</span></div>`:'')+
-    (p.is_deceased?`<div class="pp-r"><span class="pp-v" style="color:var(--text3)">Deceased</span></div>`:'')+
-    (my.length?`<div style="margin-top:.5rem"><div class="qtag">Connections</div>${my.slice(0,8).map(r=>{const o=r.from_id===id?r.to_id:r.from_id;const op=STATE.people[o];return `<span class="chip">${esc(r.label||r.type)} ${op?esc(op.full_name):'?'}</span>`;}).join('')}</div>`:'')+
-    `<div style="margin-top:.875rem;display:flex;gap:.5rem;flex-wrap:wrap">
-      <button class="btn btn-s" style="font-size:11px;padding:5px 10px" onclick="preConn('${id}')">Find connection</button>
-      <button class="btn btn-s" style="font-size:11px;padding:5px 10px;color:var(--red)" onclick="delPerson('${id}')">Delete</button>
-    </div>`;
+function setupPanZoom(){
+  const vp=document.getElementById('tree-viewport');
+  vp.onwheel=e=>{
+    e.preventDefault();
+    const delta=e.deltaY<0?1.1:0.91;
+    const rect=vp.getBoundingClientRect();
+    const mx=e.clientX-rect.left, my=e.clientY-rect.top;
+    treeX=(treeX-mx)*delta+mx;
+    treeY=(treeY-my)*delta+my;
+    treeZoom*=delta;
+    treeZoom=Math.max(.08,Math.min(treeZoom,3));
+    applyTransform();
+  };
+  vp.onmousedown=e=>{
+    if(e.target.closest('.pcard')||e.target.closest('.pp-x'))return;
+    isDragging=true; dragStartX=e.clientX-treeX; dragStartY=e.clientY-treeY;
+    vp.style.cursor='grabbing';
+  };
+  vp.onmousemove=e=>{if(!isDragging)return;treeX=e.clientX-dragStartX;treeY=e.clientY-dragStartY;applyTransform();};
+  vp.onmouseup=e=>{isDragging=false;vp.style.cursor='grab';};
+  vp.onmouseleave=e=>{isDragging=false;vp.style.cursor='grab';};
+  // Touch
+  let lt=null;
+  vp.ontouchstart=e=>{lt=e.touches[0];};
+  vp.ontouchmove=e=>{
+    if(!lt)return; const t=e.touches[0];
+    treeX+=(t.clientX-lt.clientX); treeY+=(t.clientY-lt.clientY);
+    lt=t; applyTransform(); e.preventDefault();
+  };
+  vp.ontouchend=()=>{lt=null;};
+}
+
+function applyTransform(){
+  document.getElementById('tree-canvas').style.transform=`translate(${treeX}px,${treeY}px) scale(${treeZoom})`;
+  document.getElementById('tree-canvas').style.transformOrigin='0 0';
+}
+
+function fitTree(){
+  const vp=document.getElementById('tree-viewport');
+  const canvas=document.getElementById('tree-canvas');
+  const vpW=vp.clientWidth||900, vpH=vp.clientHeight||650;
+  const cW=parseInt(canvas.style.width)||vpW;
+  const cH=parseInt(canvas.style.height)||vpH;
+  if(cW<=0||cH<=0){treeZoom=1;treeX=0;treeY=0;applyTransform();return;}
+  const scaleX=vpW/cW, scaleY=vpH/cH;
+  treeZoom=Math.min(scaleX,scaleY,1)*.92;
+  treeX=(vpW-cW*treeZoom)/2;
+  treeY=(vpH-cH*treeZoom)/2+20;
+  applyTransform();
+}
+function zIn(){treeZoom=Math.min(treeZoom*1.35,3);applyTransform();}
+function zOut(){treeZoom=Math.max(treeZoom*.74,.08);applyTransform();}
+
+// ════════════════════════════════════════════════════════
+//  PROFILE DRAWER
+// ════════════════════════════════════════════════════════
+const REL_KINDS=[['parent','माता-पिता (Parent)'],['child','संतान (Child)'],['spouse','जीवनसाथी (Spouse)'],['sibling','भाई-बहन (Sibling)']];
+
+function openProfile(id){renderProfile(id,false);}
+function closeProfile(){document.getElementById('ppanel').classList.remove('open');}
+
+function renderProfile(id,edit){
+  const p=STATE.people[id]; if(!p) return;
+  const c=nodeColor(p);
+  const av=document.getElementById('pp-av');
+  av.style.cssText=`background:${c}22;color:${c};width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;`;
+  av.textContent=initials(p.full_name);
+  document.getElementById('pp-name').textContent=p.full_name||'—';
+  document.getElementById('pp-sub').textContent=[p.occupation,p.birth_place].filter(Boolean).join(' · ')||'';
+  const myRels=STATE.rels.filter(r=>r.from_id===id||r.to_id===id);
+  const body=document.getElementById('pp-body');
+  const rootP=Object.values(STATE.people).find(p2=>norm(p2.full_name)===norm(CFG.rootPerson));
+  const hin=cardRelLabel(p,rootP?.id);
+
+  if(!edit){
+    body.innerHTML=
+      (hin?`<div class="pp-hin">${esc(hin)}</div>`:'') +
+      (p.birth_year?`<div class="pp-row"><span class="pp-key">जन्म</span><span class="pp-val">${p.birth_year}${p.birth_place?' in '+esc(p.birth_place):''}</span></div>`:'')+
+      (p.current_location?`<div class="pp-row"><span class="pp-key">रहते हैं</span><span class="pp-val">${esc(p.current_location)}</span></div>`:'')+
+      (p.gender&&p.gender!=='unknown'?`<div class="pp-row"><span class="pp-key">Gender</span><span class="pp-val">${p.gender}</span></div>`:'')+
+      (p.is_deceased?`<div class="pp-row"><span class="pp-val" style="color:var(--text3)">故 Deceased</span></div>`:'')+
+      (myRels.length?`<div style="margin-top:.5rem"><div class="qtag">Sambandh</div>${myRels.slice(0,8).map(r=>{const oid=r.from_id===id?r.to_id:r.from_id;const op=STATE.people[oid];return`<span class="chip">${esc(hinduRelPhrase(r.type,op?.gender,r))} ${op?esc(op.full_name):'?'}</span>`;}).join('')}</div>`:'')+
+      `<div style="margin-top:.875rem;display:flex;gap:.5rem;flex-wrap:wrap">
+        <button class="btn btn-a" style="font-size:11px;padding:5px 10px" onclick="renderProfile('${id}',true)">Edit</button>
+        <button class="btn btn-s" style="font-size:11px;padding:5px 10px" onclick="preConn('${id}')">Sambandh</button>
+      </div>`;
+  } else {
+    const others=Object.values(STATE.people).filter(x=>x.id!==id);
+    body.innerHTML=
+      `<div class="qtag">नाम</div><input class="pp-in" id="ef-n" value="${esc(p.full_name||'')}">
+       <div class="row2">
+         <div><div class="qtag">जन्म वर्ष</div><input class="pp-in" id="ef-y" value="${p.birth_year||''}"></div>
+         <div><div class="qtag">Gender</div><select class="pp-in" id="ef-g">
+           <option value="unknown"${(!p.gender||p.gender==='unknown')?' selected':''}>—</option>
+           <option value="male"${p.gender==='male'?' selected':''}>Male / पुरुष</option>
+           <option value="female"${p.gender==='female'?' selected':''}>Female / महिला</option>
+         </select></div>
+       </div>
+       <div class="qtag">जन्म स्थान</div><input class="pp-in" id="ef-pl" value="${esc(p.birth_place||'')}">
+       <div class="qtag">व्यवसाय / Occupation</div><input class="pp-in" id="ef-oc" value="${esc(p.occupation||'')}">
+       <label style="display:flex;gap:6px;align-items:center;font-size:11px;color:var(--text2);margin:4px 0 8px">
+         <input type="checkbox" id="ef-d" ${p.is_deceased?'checked':''}> Deceased / स्वर्गवासी
+       </label>
+       <div class="qtag">Sambandh (this person is…)</div>
+       ${myRels.map(r=>{const oid=r.from_id===id?r.to_id:r.from_id;const op=STATE.people[oid];const k=relKindFromType(r.type,r.from_id===id);return`<div class="relrow">
+         <span class="rn">${op?esc(op.full_name):'?'}</span>
+         <select class="relsel" onchange="setRel('${r.id}','${id}','${oid}',this.value)">
+           ${REL_KINDS.map(([kk,l])=>`<option value="${kk}"${k===kk?' selected':''}>${l}</option>`).join('')}
+         </select>
+         <button class="rx" onclick="removeRel('${r.id}','${id}')">✕</button>
+       </div>`;}).join('')}
+       <div class="relrow" style="margin-top:6px">
+         <select class="relsel rn" id="ef-np" style="max-width:none;flex:1"><option value="">+ link to…</option>${others.map(o=>`<option value="${o.id}">${esc(o.full_name)}</option>`).join('')}</select>
+         <select class="relsel" id="ef-nk">${REL_KINDS.map(([kk,l])=>`<option value="${kk}">${l}</option>`).join('')}</select>
+         <button class="rx" style="color:var(--saffron);font-size:16px" onclick="addRel('${id}')">＋</button>
+       </div>
+       <div style="margin-top:.875rem;display:flex;gap:.5rem;align-items:center">
+         <button class="btn btn-a" style="font-size:11px;padding:5px 10px" onclick="saveFields('${id}')">Save</button>
+         <button class="btn btn-s" style="font-size:11px;padding:5px 10px" onclick="renderProfile('${id}',false)">Cancel</button>
+         <button class="btn btn-s" style="font-size:11px;padding:5px 10px;color:var(--red);margin-left:auto" onclick="delPerson('${id}')">Delete</button>
+       </div>`;
+  }
   document.getElementById('ppanel').classList.add('open');
 }
-function closeProfile(){ document.getElementById('ppanel').classList.remove('open'); }
-function preConn(id){ document.getElementById('sel-a').value=id; nav('connect',document.querySelectorAll('.tab')[5]); }
+
+function relKindFromType(type,isFrom){
+  const t=(type||'').toUpperCase();
+  if(t.includes('SPOUSE'))return'spouse';
+  if(t.includes('SIBLING'))return'sibling';
+  if(t.includes('PARENT'))return isFrom?'parent':'child';
+  if(t.includes('CHILD'))return isFrom?'child':'parent';
+  return'parent';
+}
+function kindToEdge(kind,me,other){
+  if(kind==='parent')return{from_id:me,to_id:other,type:'PARENT_OF',label:'parent of'};
+  if(kind==='child')return{from_id:other,to_id:me,type:'PARENT_OF',label:'parent of'};
+  if(kind==='spouse')return{from_id:me,to_id:other,type:'SPOUSE_OF',label:'spouse of'};
+  return{from_id:me,to_id:other,type:'SIBLING_OF',label:'sibling of'};
+}
+async function saveFields(id){
+  const body={full_name:document.getElementById('ef-n').value.trim()||STATE.people[id].full_name,
+    birth_year:parseInt(document.getElementById('ef-y').value)||null,
+    birth_place:document.getElementById('ef-pl').value.trim()||null,
+    occupation:document.getElementById('ef-oc').value.trim()||null,
+    gender:document.getElementById('ef-g').value,
+    is_deceased:document.getElementById('ef-d').checked};
+  try{const rows=await sbPatch('people',`?id=eq.${id}`,body);STATE.people[id]={...STATE.people[id],...(rows[0]||body)};refresh();renderProfile(id,false);}
+  catch(e){alert('Save failed: '+e.message);}
+}
+async function setRel(relId,me,other,kind){
+  const edge=kindToEdge(kind,me,other);
+  try{await sbDel('relationships',`?id=eq.${relId}`);STATE.rels=STATE.rels.filter(r=>r.id!==relId);
+    if(!dupRel(edge.from_id,edge.to_id,edge.type)){const rows=await sbPost('relationships',{...edge,tree_id:CFG.treeId});STATE.rels.push(rows[0]);}
+    refresh();renderProfile(me,true);}catch(e){alert(e.message);}
+}
+async function addRel(me){
+  const other=document.getElementById('ef-np').value;const kind=document.getElementById('ef-nk').value;if(!other)return;
+  const edge=kindToEdge(kind,me,other);
+  if(dupRel(edge.from_id,edge.to_id,edge.type))return alert('That link already exists.');
+  try{const rows=await sbPost('relationships',{...edge,tree_id:CFG.treeId});STATE.rels.push(rows[0]);refresh();renderProfile(me,true);}
+  catch(e){alert(e.message);}
+}
+async function removeRel(relId,me){
+  try{await sbDel('relationships',`?id=eq.${relId}`);STATE.rels=STATE.rels.filter(r=>r.id!==relId);refresh();renderProfile(me,true);}
+  catch(e){alert(e.message);}
+}
 async function delPerson(id){
-  if(!confirm('Delete this person and their links?'))return;
-  try{ await api('DELETE',`people?id=eq.${id}`); delete STATE.people[id];
-    STATE.rels=STATE.rels.filter(r=>r.from_id!==id&&r.to_id!==id); closeProfile(); refresh(); }
-  catch(e){ alert('Delete failed: '+e.message); }
+  if(!confirm('Delete this person and all their sambandh?'))return;
+  try{await sbDel('people',`?id=eq.${id}`);delete STATE.people[id];
+    const toDelete=STATE.rels.filter(r=>r.from_id===id||r.to_id===id);
+    for(const r of toDelete)await sbDel('relationships',`?id=eq.${r.id}`);
+    STATE.rels=STATE.rels.filter(r=>r.from_id!==id&&r.to_id!==id);
+    closeProfile();refresh();}catch(e){alert(e.message);}
+}
+function dupRel(f,t,type){const sym=type.includes('SPOUSE')||type.includes('SIBLING');return STATE.rels.some(r=>((r.from_id===f&&r.to_id===t)||(sym&&r.from_id===t&&r.to_id===f))&&(r.type||'').toUpperCase()===type);}
+function preConn(id){document.getElementById('sel-a').value=id;nav('connect',document.querySelectorAll('.tab')[5]);}
+async function wipeAll(){
+  if(!confirm('Delete ALL people and relationships?'))return;
+  try{
+    if(CFG.demo){['ftd_people','ftd_relationships','ftd_invites','ftd_interviews'].forEach(k=>localStorage.setItem(k,'[]'));}
+    else{await sbDel('relationships','?from_id=neq.00000000-0000-0000-0000-000000000000');await sbDel('people','?id=neq.00000000-0000-0000-0000-000000000000');}
+    STATE.people={};STATE.rels=[];refresh();alert('Tree cleared.');}catch(e){alert(e.message);}
 }
 
-// ── AI ──
+// ════════════════════════════════════════════════════════
+//  AI PROVIDERS
+// ════════════════════════════════════════════════════════
 const PROV={
-  groq:{url:'https://api.groq.com/openai/v1/chat/completions',model:'llama-3.3-70b-versatile'},
-  gemini:{url:'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',model:'gemini-2.0-flash'},
-  openai:{url:'https://api.openai.com/v1/chat/completions',model:'gpt-4o-mini'},
-  anthropic:{url:'https://api.anthropic.com/v1/messages',model:'claude-sonnet-4-6',anthropic:true},
-  none:null,
+  groq:    {url:'https://api.groq.com/openai/v1/chat/completions',     model:'llama-3.3-70b-versatile'},
+  gemini:  {url:'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', model:'gemini-2.0-flash'},
+  openai:  {url:'https://api.openai.com/v1/chat/completions',          model:'gpt-4o-mini'},
+  anthropic:{url:'https://api.anthropic.com/v1/messages',              model:'claude-sonnet-4-6',ant:true},
+  none:null
 };
 async function callAI(prompt){
   const pr=PROV[STATE.aiProvider]; if(!pr) throw new Error('no-ai');
   const model=STATE.aiModel||pr.model;
-  if(pr.anthropic){
-    const r=await fetch(pr.url,{method:'POST',headers:{'Content-Type':'application/json','x-api-key':STATE.aiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model,max_tokens:2000,temperature:0,messages:[{role:'user',content:prompt}]})});
-    const d=await r.json(); if(!r.ok)throw new Error(d.error?.message||r.status); return d.content[0]?.text||'';
+  if(pr.ant){
+    const r=await fetch(pr.url,{method:'POST',headers:{'Content-Type':'application/json','x-api-key':STATE.aiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model,max_tokens:2000,messages:[{role:'user',content:prompt}]})});
+    const d=await r.json();if(!r.ok)throw new Error(d.error?.message||r.status);return d.content[0]?.text||'';
   }
-  const r=await fetch(pr.url,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${STATE.aiKey}`},body:JSON.stringify({model,max_tokens:2000,temperature:0,messages:[{role:'user',content:prompt}]})});
-  const d=await r.json(); if(!r.ok)throw new Error(d.error?.message||r.status); return d.choices[0]?.message?.content||'';
+  const r=await fetch(pr.url,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${STATE.aiKey}`},body:JSON.stringify({model,max_tokens:2000,messages:[{role:'user',content:prompt}]})});
+  const d=await r.json();if(!r.ok)throw new Error(d.error?.message||r.status);return d.choices[0]?.message?.content||'';
 }
-function parsePrompt(name,rel,ans){
+
+const QUESTIONS=[
+  ['q1','पूरा नाम व उपनाम / Full name & nicknames','मेरा नाम Ramesh Kumar Tiwari है…'],
+  ['q2','जन्म वर्ष, जन्म स्थान / Birth year & place','1962 में Basahi, Prayagraj में जन्म हुआ…'],
+  ['q3','व्यवसाय / Occupation','28 वर्ष सरकारी विद्यालय में शिक्षक रहा…'],
+  ['q4','माता-पिता / Parents (name, place, alive/deceased)','पिताजी Shivram Tiwari, Basahi, 1998 में स्वर्गवासी। माताजी Savitri Devi, जीवित हैं…'],
+  ['q5','दादा-दादी, नाना-नानी / Grandparents','दादाजी Harishankar Tiwari। दादीजी Devki Devi…'],
+  ['q6','भाई-बहन / Siblings','बड़े भाई Suresh Tiwari, छोटे भाई Mahesh Tiwari…'],
+  ['q7','पति/पत्नी व संतान / Spouse & children','पत्नी Sunita Devi, 1988 में विवाह। पुत्र Ankit Tiwari 1991…'],
+  ['q8','साझा रिश्तेदार / Shared relatives with inviter','Shivani मेरे भाई Suresh की बेटी है — भतीजी है।'],
+  ['q9','अन्य रिश्तेदार / Other relatives','चचेरे भाई Devendra Tiwari, Lucknow में।'],
+];
+
+function buildParsePrompt(name,rel,ans){
   const qa=QUESTIONS.map(([id,q])=>`${id.toUpperCase()} (${q}): ${ans[id]||'(none)'}`).join('\n');
-  const existing=Object.values(STATE.people);
-  const existingList = existing.length
-    ? existing.map(p=>`- ${p.full_name}${p.birth_year?` (b. ${p.birth_year})`:''}${p.birth_place?`, ${p.birth_place}`:''}${p.is_deceased?' [deceased]':''}`).join('\n')
-    : '(tree is empty so far)';
-  return `You are extracting a family tree from one relative's interview answers. Be conservative: it is far better to omit an uncertain detail than to invent one.
+  return `You convert a Hindi family interview into JSON. The family follows Indian Hindu traditions with specific relationship terms.
 
-STRICT RULES (do not break these):
-1. Only include a person if their name is explicitly stated in the answers below. Never invent a name, age, birth year, place, or occupation that is not stated or very directly implied (e.g. "born in 1962" directly gives birthYear; do not infer a birth year from an age that wasn't given).
-2. Never turn a place name, village, organization, nickname-only reference, or pronoun into a separate person.
-3. Only create a relationship edge if the text explicitly states it or it is a single, unambiguous logical step (e.g. "my brother's daughter" means the brother is PARENT_OF that daughter). Do not chain multiple uncertain inferences together.
-4. PEOPLE ALREADY IN THE TREE are listed below. If someone in the answers is clearly one of these people, reuse their EXACT existing spelling of their name in your output (so they can be matched) instead of creating a near-duplicate with different spelling or details. Do not alter an existing person's already-known facts based on a vague new mention.
-5. Confidence scoring: 1.0 = name and fact stated verbatim; 0.7 = directly and unambiguously implied by one stated fact; 0.5 = a reasonable but uncertain guess. If your confidence would be below 0.5, omit that person or relationship entirely rather than including a low-confidence guess.
-6. Respond with ONLY raw JSON — no markdown fences, no commentary, no explanation text before or after.
+RESPONDENT: ${name}. Relation to interviewer: ${rel||'unknown'}.
+ROOT PERSON of the tree: ${CFG.rootPerson}
 
-PEOPLE ALREADY IN THE TREE:
-${existingList}
-
-RESPONDENT: ${name} — stated relation to the interviewer: ${rel||'unknown'}
-
-INTERVIEW ANSWERS:
 ${qa}
 
-Output schema (return exactly this shape):
-{"respondent":{"fullName":"","nicknames":[],"birthYear":null,"birthPlace":null,"currentLocation":null,"occupation":null,"isDeceased":false,"gender":"unknown"},
-"persons":[{"id":"p1","fullName":"","birthYear":null,"birthPlace":null,"occupation":null,"isDeceased":false,"gender":"unknown","confidence":0.9}],
-"relationships":[{"from":"respondent|p1|INTERVIEWER","to":"respondent|p1|INTERVIEWER","type":"PARENT_OF|CHILD_OF|SPOUSE_OF|SIBLING_OF|GRANDPARENT_OF|UNCLE_OF|AUNT_OF|COUSIN_OF|OTHER","label":"father of","confidence":0.9}],
-"insights":{"summary":"one or two factual sentences, no speculation"}}
-INTERVIEWER means the person who sent this interview (the tree owner). Always include the respondent. IDs for new persons: p1, p2, p3…`;
+CRITICAL RULES:
+1. Only extract people actually named. Never invent.
+2. PARENT_OF always goes FROM parent TO child. Never use CHILD_OF.
+3. Use only: PARENT_OF, SPOUSE_OF, SIBLING_OF (SIBLING_OF and SPOUSE_OF are symmetric — list once).
+4. Set gender for everyone: male=पिता/पुत्र/भाई/पति/दादा/नाना/चाचा/मामा/ताऊ/फूफा. female=माता/पुत्री/बहन/पत्नी/दादी/नानी/चाची/मामी/बुआ/मौसी.
+5. INTERVIEWER = the person who sent this interview link.
+6. Detect grandparents as 2 PARENT_OF hops — grandfather is PARENT_OF father who is PARENT_OF respondent.
+7. Hindu relationship labels in "label" field: use Hindi terms (पिताजी, माताजी, भाई, बहन, पत्नी, पति, पुत्र, पुत्री, दादाजी, दादीजी, etc.)
+
+Output JSON only — no markdown:
+{"respondent":{"fullName":"","birthYear":null,"birthPlace":null,"occupation":null,"isDeceased":false,"gender":"male|female|unknown"},
+"persons":[{"id":"p1","fullName":"","birthYear":null,"birthPlace":null,"occupation":null,"isDeceased":false,"gender":"male|female|unknown","confidence":0.9}],
+"relationships":[{"from":"respondent|p1|INTERVIEWER","to":"respondent|p1|INTERVIEWER","type":"PARENT_OF|SPOUSE_OF|SIBLING_OF","label":"पिताजी","confidence":0.9}],
+"insights":{"summary":""}}`;
 }
-// rule-based fallback
+
+// Rule-based fallback
 function ruleParse(name,rel,a){
   const yr=t=>(t.match(/\b(18|19|20)\d{2}\b/g)||[]).map(Number);
   const nm=t=>(t.match(/\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)+\b/g)||[]);
-  const pl=t=>{const m=t.match(/\bin\s+([A-Z][a-z]+(?:[\s,]+[A-Z][a-z]+)*)/);return m?m[1].replace(/[\s,]+$/,''):null;};
-  const dead=t=>/pass(ed)?\b|died|\blate\b|expired|no more/i.test(t);
+  const pl=t=>{const m=t.match(/\bin\s+([A-Z][a-z]+(?:[\s,]+(?:[A-Z][a-z]+|UP|MP|UK))*)/);return m?m[1].replace(/[\s,]+$/,''):null;};
+  const dead=t=>/pass|died|\blate\b|expired|स्वर्गवासी|नहीं रहे/i.test(t);
   let i=1; const P=[],R=[];
   const add=(n,x={})=>{const id='p'+i++;P.push({id,fullName:n,birthYear:null,birthPlace:null,occupation:null,isDeceased:false,gender:'unknown',confidence:.7,...x});return id;};
   const rId=add(nm(a.q1||'')[0]||name,{birthYear:yr(a.q2||'')[0]||null,birthPlace:pl(a.q2||''),occupation:(a.q3||'').split('.')[0].slice(0,40)||null,confidence:.9});
-  R.push({from:rId,to:'INTERVIEWER',type:'OTHER',label:rel||'relative of',confidence:.5});
-  nm(a.q4||'').slice(0,2).forEach((n,j)=>{const id=add(n,{birthYear:yr(a.q4||'')[j]||null,isDeceased:dead(a.q4||''),gender:j?'female':'male',birthPlace:pl(a.q4||'')});R.push({from:id,to:rId,type:'PARENT_OF',label:j?'mother of':'father of',confidence:.7});});
-  nm(a.q5||'').slice(0,4).forEach(n=>{const id=add(n,{isDeceased:dead(a.q5||''),confidence:.5});R.push({from:id,to:rId,type:'GRANDPARENT_OF',label:'grandparent of',confidence:.5});});
-  nm(a.q6||'').forEach(n=>{const id=add(n,{birthYear:yr(a.q6||'')[0]||null});R.push({from:rId,to:id,type:'SIBLING_OF',label:'sibling of',confidence:.6});});
-  const sp=nm(a.q7||''); if(sp[0]){const id=add(sp[0]);R.push({from:rId,to:id,type:'SPOUSE_OF',label:'married to',confidence:.7});}
-  sp.slice(1).forEach(n=>{const id=add(n);R.push({from:rId,to:id,type:'PARENT_OF',label:'parent of',confidence:.6});});
-  [...nm(a.q8||''),...nm(a.q9||'')].forEach(n=>{if(!P.some(p=>p.fullName===n)){const id=add(n,{confidence:.5});R.push({from:id,to:rId,type:'OTHER',label:'relative of',confidence:.4});}});
-  return {persons:P,relationships:R,insights:{summary:`Rule-based parse: ${P.length} people, ${R.length} links found. Accuracy is rough — review before saving, or switch to a free AI provider in Settings.`}};
+  nm(a.q4||'').slice(0,2).forEach((n,j)=>{const id=add(n,{birthYear:yr(a.q4||'')[j]||null,isDeceased:dead(a.q4),gender:j?'female':'male',birthPlace:pl(a.q4||'')});R.push({from:id,to:rId,type:'PARENT_OF',label:j?'माताजी':'पिताजी',confidence:.7});});
+  nm(a.q5||'').slice(0,4).forEach((n,j)=>{const id=add(n,{isDeceased:dead(a.q5),gender:j%2?'female':'male',confidence:.5});
+    const parentId=P[1]?.id; if(parentId){R.push({from:id,to:parentId,type:'PARENT_OF',label:j%2?'दादीजी':'दादाजी',confidence:.5});}});
+  nm(a.q6||'').forEach(n=>{const id=add(n,{birthYear:yr(a.q6||'')[0]||null});R.push({from:rId,to:id,type:'SIBLING_OF',label:'भाई-बहन',confidence:.6});});
+  const sp=nm(a.q7||'');if(sp[0]){const id=add(sp[0],{gender:'female'});R.push({from:rId,to:id,type:'SPOUSE_OF',label:'पत्नी',confidence:.7});}
+  sp.slice(1).forEach(n=>{const id=add(n);R.push({from:rId,to:id,type:'PARENT_OF',label:'पुत्र/पुत्री',confidence:.6});});
+  [...nm(a.q8||''),...nm(a.q9||'')].forEach(n=>{if(!P.some(p=>p.fullName===n)){const id=add(n,{confidence:.5});R.push({from:id,to:'INTERVIEWER',type:'OTHER',label:'रिश्तेदार',confidence:.4});}});
+  return{persons:P,relationships:R,insights:{summary:`Rule-based parse: ${P.length} people, ${R.length} sambandh found.`}};
 }
 
 async function doParse(name,rel,ans){
   let parsed;
-  if(STATE.aiProvider==='none'){ parsed=ruleParse(name,rel,ans); }
-  else {
-    const raw=await callAI(parsePrompt(name,rel,ans));
+  if(STATE.aiProvider==='none'){parsed=ruleParse(name,rel,ans);}
+  else{
+    const raw=await callAI(buildParsePrompt(name,rel,ans));
     const clean=raw.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();
-    try{ parsed=JSON.parse(clean); }catch(e){ const m=raw.match(/\{[\s\S]+\}/); if(!m)throw new Error('AI returned invalid JSON'); parsed=JSON.parse(m[0]); }
+    try{parsed=JSON.parse(clean);}catch(e){const m=raw.match(/\{[\s\S]+\}/);if(!m)throw new Error('AI returned invalid JSON');parsed=JSON.parse(m[0]);}
   }
-  // normalize: fold respondent into persons, filtering out empty/low-confidence junk
-  const persons=(parsed.persons||[])
-    .filter(p=>p.fullName && p.fullName.trim().length>1)
-    .filter(p=>p.confidence===undefined || p.confidence>=0.45);
-  if(parsed.respondent?.fullName && !persons.some(p=>p.id==='respondent')) persons.unshift({id:'respondent',...parsed.respondent,confidence:.95});
-  // dup status
-  persons.forEach(p=>{ const ex=Object.values(STATE.people).find(e=>norm(e.full_name)===norm(p.fullName)&&norm(p.fullName).length>2); p._status=ex?'merge':'new'; p._existing=ex?ex.id:null; });
-  return {persons,relationships:parsed.relationships||[],insights:parsed.insights||{},name};
+  const persons=[...(parsed.persons||[])];
+  if(parsed.respondent?.fullName&&!persons.some(p=>p.id==='respondent'))
+    persons.unshift({id:'respondent',...parsed.respondent,confidence:.95});
+  persons.forEach(p=>{const ex=Object.values(STATE.people).find(e=>norm(e.full_name)===norm(p.fullName)&&norm(p.fullName).length>2);p._status=ex?'merge':'new';p._existing=ex?ex.id:null;});
+  return{persons,relationships:parsed.relationships||[],insights:parsed.insights||{},name};
 }
 
 function reviewHTML(res){
-  return `<div class="slabel" style="margin:1.25rem 0 0">${res.persons.length} people found · ${res.persons.filter(p=>p._status==='new').length} new · ${res.persons.filter(p=>p._status==='merge').length} already in tree</div>
-  <div class="psub" style="margin:.25rem 0 0">Review each card — click "Include" to exclude anything that looks wrong or unfamiliar before saving.</div>
-  <div class="grid">${res.persons.map(p=>`<div class="pc ${p._status}" id="pc-${esc(p.id)}">
-    <div class="pc-top"><div class="pc-n">${esc(p.fullName)}</div><span class="pt ${p._status}">${p._status==='merge'?'matched':'new'}</span></div>
-    ${p.birthYear?`<div class="pc-r">Born ${p.birthYear}${p.birthPlace?' · '+esc(p.birthPlace):''}</div>`:''}
-    ${p.occupation?`<div class="pc-r">${esc(p.occupation)}</div>`:''}
-    ${p.isDeceased?`<div class="pc-r" style="color:var(--text3)">Deceased</div>`:''}
-    ${p.confidence!==undefined?`<div class="pc-r">Confidence ${Math.round(p.confidence*100)}%</div>`:''}
-    <button class="btn btn-s" id="ex-${esc(p.id)}" style="font-size:10px;padding:4px 9px;margin-top:6px" onclick="toggleExclude('${esc(p.id)}',this)">Include ✓</button>
+  return`<div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin:.875rem 0 .625rem">${res.persons.length} लोग · ${res.persons.filter(p=>p._status==='new').length} नए · ${res.persons.filter(p=>p._status==='merge').length} पहले से</div>
+  <div class="rgrid">${res.persons.map(p=>`<div class="rc ${p._status}">
+    <div class="rc-top"><div class="rc-n">${esc(p.fullName)}</div><span class="rtag ${p._status}">${p._status==='merge'?'matched':'new'}</span></div>
+    ${p.birthYear?`<div class="rc-d">${p.birthYear}${p.birthPlace?' · '+esc(p.birthPlace):''}</div>`:''}
+    ${p.occupation?`<div class="rc-d">${esc(p.occupation)}</div>`:''}
+    ${p.isDeceased?`<div class="rc-d" style="color:var(--text3)">स्वर्गवासी</div>`:''}
   </div>`).join('')}</div>
-  ${res.insights?.summary?`<div class="summary"><b>Summary</b>${esc(res.insights.summary)}</div>`:''}`;
-}
-function toggleExclude(pid,b){
-  if(!parseResult)return; const p=parseResult.persons.find(x=>String(x.id)===String(pid)); if(!p)return;
-  p._excluded=!p._excluded;
-  document.getElementById('pc-'+pid).classList.toggle('excluded',p._excluded);
-  b.textContent=p._excluded?'Excluded ✕':'Include ✓';
+  ${res.insights?.summary?`<div class="ai-summary"><b>सारांश</b>${esc(res.insights.summary)}</div>`:''}`;
 }
 
 async function saveTree(res){
-  const rootP=Object.values(STATE.people).find(p=>norm(p.full_name)===norm(CONFIG.ROOT_PERSON));
-  const interviewerId=rootP?rootP.id:null;
+  const rootP=Object.values(STATE.people).find(p=>norm(p.full_name)===norm(CFG.rootPerson));
+  const interviewerId=rootP?.id||null;
   const idMap={};
   for(const p of res.persons){
-    if(p._excluded) continue;
-    if(p._status==='merge'){ idMap[p.id]=p._existing; continue; }
-    const rows=await api('POST','people',{ full_name:p.fullName, nicknames:p.nicknames||[], birth_year:p.birthYear||null,
-      birth_place:p.birthPlace||null, current_location:p.currentLocation||null, occupation:p.occupation||null,
-      is_deceased:!!p.isDeceased, gender:p.gender||'unknown', source:'interview', added_by:res.name, confidence:p.confidence||0.9 });
-    idMap[p.id]=rows[0].id; STATE.people[rows[0].id]=rows[0];
+    if(p._status==='merge'){idMap[p.id]=p._existing;continue;}
+    const rows=await sbPost('people',{tree_id:CFG.treeId,full_name:p.fullName,nicknames:p.nicknames||[],
+      birth_year:p.birthYear||null,birth_place:p.birthPlace||null,current_location:p.currentLocation||null,
+      occupation:p.occupation||null,is_deceased:!!p.isDeceased,gender:p.gender||'unknown',
+      source:'interview',added_by:res.name,confidence:p.confidence||0.9});
+    idMap[p.id]=rows[0].id;STATE.people[rows[0].id]=rows[0];
   }
   for(const r of res.relationships){
-    const f=r.from==='INTERVIEWER'?interviewerId:idMap[r.from];
-    const t=r.to==='INTERVIEWER'?interviewerId:idMap[r.to];
-    if(!f||!t||f===t) continue;
-    if(STATE.rels.some(x=>x.from_id===f&&x.to_id===t)) continue;
-    const rows=await api('POST','relationships',{from_id:f,to_id:t,type:r.type,label:r.label,confidence:r.confidence||0.9});
+    let type=(r.type||'OTHER').toUpperCase();
+    let f=r.from==='INTERVIEWER'?interviewerId:idMap[r.from];
+    let t=r.to==='INTERVIEWER'?interviewerId:idMap[r.to];
+    if(type.includes('CHILD')){const tmp=f;f=t;t=tmp;type='PARENT_OF';}
+    if(!f||!t||f===t)continue;
+    if(dupRel(f,t,type))continue;
+    const rows=await sbPost('relationships',{tree_id:CFG.treeId,from_id:f,to_id:t,type,label:r.label,confidence:r.confidence||0.9});
     STATE.rels.push(rows[0]);
   }
 }
 
-// ── owner: add person ──
+// ════════════════════════════════════════════════════════
+//  OWNER: ADD PERSON
+// ════════════════════════════════════════════════════════
+function buildIvForm(containerId){
+  const el=document.getElementById(containerId);
+  el.innerHTML=`<div class="icard"><div class="icard-h"><div class="icard-t">किसके बारे में? / About whom?</div><div class="badge">Required</div></div>
+  <div class="icard-b"><div class="row2">
+    <div><div class="qtag">उनका नाम</div><input class="qin" id="iv-name" placeholder="e.g. Ramesh Kumar Tiwari" style="min-height:unset;resize:none"></div>
+    <div><div class="qtag">आपसे रिश्ता</div><input class="qin" id="iv-rel" placeholder="e.g. चाचाजी / Paternal uncle" style="min-height:unset;resize:none"></div>
+  </div></div></div>` +
+  QUESTIONS.map(([id,q,ph])=>`<div class="icard"><div class="icard-b"><div class="qtag">${q}</div><textarea class="qin fq" data-q="${id}" placeholder="${ph}"></textarea></div></div>`).join('');
+}
+
+function collectIvForm(containerId){
+  const o={};
+  document.querySelectorAll(`#${containerId} .fq`).forEach(t=>o[t.dataset.q]=t.value.trim());
+  return o;
+}
+
 async function ownerParse(){
-  const name=document.querySelector('#iv-form .nm-name').value.trim();
-  const rel=document.querySelector('#iv-form .nm-rel').value.trim();
-  if(!name) return note('iv-notice','err','Enter a name first.');
-  const ans=collectForm('iv-form');
-  if(!Object.values(ans).some(a=>a.length>8)) return note('iv-notice','err','Fill in at least a few answers.');
-  if(STATE.aiProvider!=='none'&&!STATE.aiKey) return note('iv-notice','err','Add an API key in Settings, or pick "No AI · rules".');
-  btn('parse-btn',true,'Parsing…'); note('iv-notice','info','Parsing…');
+  const name=(document.getElementById('iv-name')?.value||'').trim();
+  const rel=(document.getElementById('iv-rel')?.value||'').trim();
+  if(!name)return note('iv-notice','err','नाम डालें / Enter a name.');
+  const ans=collectIvForm('iv-form');
+  if(!Object.values(ans).some(a=>a.length>8))return note('iv-notice','err','कुछ उत्तर दें / Fill in at least a few answers.');
+  if(STATE.aiProvider!=='none'&&!STATE.aiKey)return note('iv-notice','err','Add API key in Settings, or pick "No AI".');
+  btn('parse-btn',true,'Parsing…');
+  think('iv-think',true,'Sending to AI…\n');
   try{
     parseResult=await doParse(name,rel,ans);
+    think('iv-think',false);
     document.getElementById('iv-notice').classList.remove('on');
     document.getElementById('iv-result').innerHTML=reviewHTML(parseResult)+
       `<div class="brow" style="margin-top:.875rem"><button class="btn btn-a" id="iv-save" onclick="ivSave()">Add to tree</button><button class="btn btn-s" onclick="document.getElementById('iv-result').innerHTML='';parseResult=null">Discard</button></div>`;
-  }catch(e){ note('iv-notice','err','Error: '+e.message); }
-  btn('parse-btn',false,'Parse →');
-}
-async function ivSave(){
-  if(!parseResult)return; btn('iv-save',true,'Saving…');
-  try{ await saveTree(parseResult); refresh(); document.getElementById('iv-result').innerHTML=''; clearForm();
-    note('iv-notice','ok',`Added ${parseResult.persons.filter(p=>p._status==='new'&&!p._excluded).length} people to your tree.`); parseResult=null; }
-  catch(e){ note('iv-notice','err','Save failed: '+e.message); btn('iv-save',false,'Add to tree'); }
+  }catch(e){think('iv-think',false);note('iv-notice','err','Error: '+e.message);}
+  btn('parse-btn',false,'Parse with AI →');
 }
 
-// ── responses (process pending invite submissions) ──
+async function ivSave(){
+  if(!parseResult)return; btn('iv-save',true,'Saving…');
+  try{await saveTree(parseResult);refresh();document.getElementById('iv-result').innerHTML='';clearIvForm();note('iv-notice','ok',`${parseResult.persons.filter(p=>p._status==='new').length} लोग जुड़े / people added.`);parseResult=null;}
+  catch(e){note('iv-notice','err','Save failed: '+e.message);btn('iv-save',false,'Add to tree');}
+}
+
+function fillDemo(){
+  document.getElementById('iv-name').value='Ramesh Kumar Tiwari';
+  document.getElementById('iv-rel').value='Paternal uncle / चाचाजी';
+  const vals={q1:'My full name is Ramesh Kumar Tiwari. Called Ramesh bhaiya.',q2:'Born 1962 in Basahi village near Prayagraj UP. Moved to Naini after marriage.',q3:'Government school teacher for 28 years. Retired 2020.',q4:'Father Shivram Tiwari, born 1930 Basahi, farmer, passed 1998. Mother Savitri Devi alive, ~85.',q5:'Paternal grandfather Harishankar Tiwari. Grandmother Devki Devi, passed before I was born.',q6:'Elder brother Suresh Tiwari born 1957 Naini. Younger brother Mahesh Tiwari born 1967.',q7:'Married Sunita Devi 1988. Son Ankit Tiwari born 1991 software engineer Lucknow.',q8:"Shivani is my brother Suresh's daughter — my bhatiji.",q9:'Cousin Devendra Tiwari in Lucknow.'};
+  document.querySelectorAll('#iv-form .fq').forEach(t=>t.value=vals[t.dataset.q]||'');
+  note('iv-notice','info','Demo answers loaded — click Parse.');
+}
+function clearIvForm(){
+  document.getElementById('iv-name').value='';document.getElementById('iv-rel').value='';
+  document.querySelectorAll('#iv-form .fq').forEach(t=>t.value='');
+  document.getElementById('iv-result').innerHTML='';document.getElementById('iv-notice').classList.remove('on');
+  document.getElementById('iv-think').classList.remove('on');parseResult=null;
+}
+
+// ════════════════════════════════════════════════════════
+//  RESPONSES
+// ════════════════════════════════════════════════════════
 function renderResponses(){
   const el=document.getElementById('resp-list');
-  if(!STATE.pending.length){ el.innerHTML='<div class="empty"><div class="ei">📭</div><div class="et">No pending responses</div><div class="es">Share an invite link — submissions appear here to process.</div></div>'; return; }
+  if(!STATE.pending.length){el.innerHTML='<div class="empty"><div class="ei">📭</div><div class="et">No pending responses</div><div class="es">Share an invite link — submissions appear here.</div></div>';return;}
   el.innerHTML=STATE.pending.map(s=>`<div class="lcard">
-    <div class="lc-top"><div class="card-t">${esc(s.respondent_name||'Someone')}</div><div class="istat pend">Pending</div></div>
-    <div class="meta">${s.relation_to_owner?esc(s.relation_to_owner)+' · ':''}Submitted ${new Date(s.created_at).toLocaleDateString()}</div>
+    <div class="lc-top"><div style="font-size:13px;font-weight:600">${esc(s.respondent_name||'Someone')}</div><div class="ist pend">Pending</div></div>
+    <div class="meta">${s.relation_to_owner?esc(s.relation_to_owner)+' · ':''}${new Date(s.created_at).toLocaleDateString()}</div>
     <div class="brow" style="margin-top:.5rem"><button class="btn btn-a" onclick="processResp('${s.id}')">Process →</button></div>
   </div>`).join('');
 }
 async function processResp(id){
-  const s=STATE.pending.find(x=>x.id===id); if(!s)return;
-  if(STATE.aiProvider!=='none'&&!STATE.aiKey){ nav('settings',document.querySelectorAll('.tab')[6]); return note('resp-notice','err','Add an API key in Settings first (or pick No AI).'); }
-  note('resp-notice','info','Parsing response…');
+  const s=STATE.pending.find(x=>x.id===id);if(!s)return;
+  if(STATE.aiProvider!=='none'&&!STATE.aiKey){nav('settings',document.querySelectorAll('.tab')[6]);return note('resp-notice','err','Add API key in Settings first.');}
+  note('resp-notice','info','Parsing…');
   try{
-    parseResult=await doParse(s.respondent_name||'Respondent', s.relation_to_owner||'', s.raw_answers||{});
+    parseResult=await doParse(s.respondent_name||'Someone',s.relation_to_owner||'',s.raw_answers||{});
     document.getElementById('resp-notice').classList.remove('on');
     document.getElementById('resp-result').innerHTML=reviewHTML(parseResult)+
       `<div class="brow" style="margin-top:.875rem"><button class="btn btn-a" id="resp-save" onclick="respSave('${id}')">Add to tree</button><button class="btn btn-s" onclick="document.getElementById('resp-result').innerHTML='';parseResult=null">Cancel</button></div>`;
-  }catch(e){ note('resp-notice','err','Error: '+e.message); }
+  }catch(e){note('resp-notice','err','Error: '+e.message);}
 }
 async function respSave(id){
-  if(!parseResult)return; btn('resp-save',true,'Saving…');
-  try{
-    await saveTree(parseResult);
-    await api('PATCH',`interviews?id=eq.${id}`,{status:'processed',parsed_data:parseResult});
-    STATE.pending=STATE.pending.filter(x=>x.id!==id);
-    refresh(); document.getElementById('resp-result').innerHTML='';
-    note('resp-notice','ok','Added to tree. Response marked processed.'); parseResult=null;
-  }catch(e){ note('resp-notice','err','Save failed: '+e.message); btn('resp-save',false,'Add to tree'); }
+  if(!parseResult)return;btn('resp-save',true,'Saving…');
+  try{await saveTree(parseResult);await sbPatch('interviews',`?id=eq.${id}`,{status:'processed'});
+    STATE.pending=STATE.pending.filter(x=>x.id!==id);refresh();document.getElementById('resp-result').innerHTML='';
+    note('resp-notice','ok','Added to tree.');parseResult=null;}
+  catch(e){note('resp-notice','err','Save failed: '+e.message);btn('resp-save',false,'Add to tree');}
 }
 
-// ── invites ──
+// ════════════════════════════════════════════════════════
+//  INVITES
+// ════════════════════════════════════════════════════════
 async function createInvite(){
-  const label=document.getElementById('inv-label').value.trim()||'Unnamed invite';
-  try{ const rows=await api('POST','invites',{label}); STATE.invites.unshift(rows[0]); document.getElementById('inv-label').value=''; renderInvites(); }
-  catch(e){ alert('Error: '+e.message); }
+  const label=document.getElementById('inv-lbl').value.trim()||'Unnamed invite';
+  try{
+    const token=Array.from(crypto.getRandomValues(new Uint8Array(16))).map(b=>b.toString(16).padStart(2,'0')).join('');
+    const rows=await sbPost('invites',{tree_id:CFG.treeId,label,token});
+    STATE.invites.unshift(rows[0]);document.getElementById('inv-lbl').value='';renderInvites();
+  }catch(e){alert('Error: '+e.message);}
 }
 function renderInvites(){
   const el=document.getElementById('inv-list');
-  if(!STATE.invites.length){ el.innerHTML='<div class="empty"><div class="ei">🔗</div><div class="et">No links yet</div><div class="es">Generate one above and share it.</div></div>'; return; }
+  if(!STATE.invites.length){el.innerHTML='<div class="empty"><div class="ei">🔗</div><div class="et">No links yet</div><div class="es">Generate one above and share it.</div></div>';return;}
   const base=location.origin+location.pathname;
-  el.innerHTML=STATE.invites.map(v=>{const url=`${base}?invite=${v.token}`;return `<div class="lcard">
-    <div class="lc-top"><div class="card-t">${esc(v.label)}</div><div class="istat ${v.used?'used':'pend'}">${v.used?'Used':'Pending'}</div></div>
-    <div class="urlrow"><div class="url">${url}</div><button class="cp" id="cp-${v.id}" onclick="cp('${url}','cp-${v.id}')">Copy</button></div>
-    <div class="meta">Created ${new Date(v.created_at).toLocaleDateString()}${v.used&&v.used_at?' · Responded '+new Date(v.used_at).toLocaleDateString():''}</div>
+  el.innerHTML=STATE.invites.map(v=>{const url=`${base}?invite=${v.token}`;return`<div class="lcard">
+    <div class="lc-top"><div style="font-size:13px;font-weight:600">${esc(v.label)}</div><div class="ist ${v.used?'used':'pend'}">${v.used?'Used':'Pending'}</div></div>
+    <div class="urlrow"><div class="url">${url}</div><button class="cp" id="cp-${v.id}" onclick="cpUrl('${url}','cp-${v.id}')">Copy</button></div>
+    <div class="meta">${new Date(v.created_at).toLocaleDateString()}${v.used&&v.used_at?' · Responded '+new Date(v.used_at).toLocaleDateString():''}</div>
   </div>`;}).join('');
 }
-function cp(url,id){ navigator.clipboard.writeText(url).then(()=>{const b=document.getElementById(id);b.textContent='Copied ✓';b.classList.add('done');setTimeout(()=>{b.textContent='Copy';b.classList.remove('done')},2000)}); }
+function cpUrl(url,id){navigator.clipboard.writeText(url).then(()=>{const b=document.getElementById(id);b.textContent='Copied ✓';b.classList.add('done');setTimeout(()=>{b.textContent='Copy';b.classList.remove('done')},2000);});}
 
-// ── insights ──
+// ════════════════════════════════════════════════════════
+//  INSIGHTS
+// ════════════════════════════════════════════════════════
 function renderInsights(){
   const people=Object.values(STATE.people);
   const places={},jobs={},surn={},dec={};
-  people.forEach(p=>{ if(p.birth_place)places[p.birth_place]=(places[p.birth_place]||0)+1;
+  people.forEach(p=>{
+    if(p.birth_place)places[p.birth_place]=(places[p.birth_place]||0)+1;
     if(p.occupation)jobs[p.occupation]=(jobs[p.occupation]||0)+1;
     if(p.full_name){const l=p.full_name.trim().split(' ').pop();surn[l]=(surn[l]||0)+1;}
-    if(p.birth_year){const d=Math.floor(p.birth_year/10)*10;dec[d+'s']=(dec[d+'s']||0)+1;} });
+    if(p.birth_year){const d=Math.floor(p.birth_year/10)*10;dec[d+'s']=(dec[d+'s']||0)+1;}
+  });
   const byY=people.filter(p=>p.birth_year).sort((a,b)=>a.birth_year-b.birth_year);
   const span=byY.length>1?byY.at(-1).birth_year-byY[0].birth_year:0;
   document.getElementById('m-grid').innerHTML=[
-    [people.length,'People'],[STATE.invites.length,'Invites'],[Object.keys(places).length,'Places'],
-    [people.filter(p=>!p.is_deceased).length,'Living'],[Math.round(span/25)||0,'Generations'],[STATE.rels.length,'Links']
+    [people.length,'लोग / People'],[STATE.invites.length,'Invites'],
+    [Object.keys(places).length,'स्थान'],[people.filter(p=>!p.is_deceased).length,'जीवित'],
+    [Math.round(span/25)||0,'पीढ़ी'],[STATE.rels.length,'Sambandh']
   ].map(([v,l])=>`<div class="mc"><div class="mv">${v}</div><div class="ml">${l}</div></div>`).join('');
   const bar=(t,d,c)=>{const s=Object.entries(d).sort((a,b)=>b[1]-a[1]).slice(0,7);const mx=Math.max(...s.map(x=>x[1]),1);
-    return `<div class="cc"><div class="ct">${t}</div>${s.length?s.map(([k,v])=>`<div class="bar"><div class="bl" title="${esc(k)}">${esc(k.length>13?k.slice(0,12)+'…':k)}</div><div class="bt"><div class="bf" style="width:${Math.round(v/mx*100)}%;background:${c}"></div></div><div class="bn">${v}</div></div>`).join(''):'<div style="font-size:11px;color:var(--text3)">No data yet</div>'}</div>`;};
-  document.getElementById('c-grid').innerHTML=bar('Birthplaces',places,'var(--gold)')+bar('Occupations',jobs,'var(--purple)')+bar('Surnames',surn,'var(--green)')+bar('Birth decades',dec,'var(--blue)');
+    return`<div class="cc"><div class="ct">${t}</div>${s.length?s.map(([k,v])=>`<div class="bar"><div class="bl" title="${esc(k)}">${esc(k.length>12?k.slice(0,11)+'…':k)}</div><div class="bt"><div class="bf" style="width:${Math.round(v/mx*100)}%;background:${c}"></div></div><div class="bn">${v}</div></div>`).join(''):'<div style="font-size:11px;color:var(--text3)">No data yet</div>'}</div>`;};
+  document.getElementById('c-grid').innerHTML=bar('जन्म स्थान',places,'var(--saffron)')+bar('Occupations',jobs,'var(--purple)')+bar('Surnames',surn,'var(--green)')+bar('Birth decades',dec,'var(--blue)');
 }
 
-// ── connections ──
+// ════════════════════════════════════════════════════════
+//  CONNECTION FINDER
+// ════════════════════════════════════════════════════════
 function fillSelects(){
   const people=Object.values(STATE.people);
   const opts=people.map(p=>`<option value="${p.id}">${esc(p.full_name)}</option>`).join('');
-  ['sel-a','sel-b'].forEach(id=>{const el=document.getElementById(id);const prev=el.value;el.innerHTML=opts||'<option>— add people —</option>';if(prev)el.value=prev;});
+  ['sel-a','sel-b'].forEach(id=>{const el=document.getElementById(id);const prev=el.value;el.innerHTML=opts||'<option>—</option>';if(prev)el.value=prev;});
   if(people.length>1&&!document.getElementById('sel-b').value)document.getElementById('sel-b').value=people[1].id;
 }
 function bfs(a,b){
-  const adj={}; STATE.rels.forEach(r=>{(adj[r.from_id]=adj[r.from_id]||[]).push(r.to_id);(adj[r.to_id]=adj[r.to_id]||[]).push(r.from_id);});
+  const adj={};STATE.rels.forEach(r=>{(adj[r.from_id]=adj[r.from_id]||[]).push(r.to_id);(adj[r.to_id]=adj[r.to_id]||[]).push(r.from_id);});
   const seen=new Set([a]),q=[[a]];
-  while(q.length){const path=q.shift(),n=path.at(-1);if(n===b)return path;for(const x of adj[n]||[])if(!seen.has(x)){seen.add(x);q.push([...path,x]);}}
+  while(q.length){const path=q.shift(),n=path.at(-1);if(n===b)return path;for(const x of(adj[n]||[]))if(!seen.has(x)){seen.add(x);q.push([...path,x]);}}
   return null;
 }
 async function findConn(){
   const a=document.getElementById('sel-a').value,b=document.getElementById('sel-b').value;
-  if(!a||!b||a===b)return alert('Pick two different people.');
-  const pA=STATE.people[a],pB=STATE.people[b],path=bfs(a,b);
+  if(!a||!b||a===b)return alert('दो अलग लोग चुनें।');
+  const pA=STATE.people[a],pB=STATE.people[b];
+  think('conn-think',true);
+  const path=bfs(a,b);
   let ai=null;
   if(STATE.aiProvider!=='none'&&STATE.aiKey&&path){
-    try{ const rels=STATE.rels.filter(r=>path.some(id=>r.from_id===id||r.to_id===id)).map(r=>`${STATE.people[r.from_id]?.full_name} —[${r.label||r.type}]→ ${STATE.people[r.to_id]?.full_name}`).join('\n');
-      const raw=await callAI(`Explain how ${pA.full_name} and ${pB.full_name} are related. Path: ${path.map(id=>STATE.people[id]?.full_name).join(' → ')}\n${rels}\nReply JSON only: {"label":"e.g. First cousins","explanation":"2 warm sentences"}`);
-      ai=JSON.parse(raw.replace(/```json\n?/g,'').replace(/```/g,'').trim()); }catch(e){}
+    try{
+      const rels=STATE.rels.filter(r=>path.some(id=>r.from_id===id||r.to_id===id))
+        .map(r=>`${STATE.people[r.from_id]?.full_name} —[${r.label||r.type}]→ ${STATE.people[r.to_id]?.full_name}`).join('\n');
+      const raw=await callAI(`You are an Indian Hindu family relationship expert. Explain how ${pA.full_name} and ${pB.full_name} are related using proper Hindi family terms (दादाजी, चाचाजी, भतीजा, etc).
+Path: ${path.map(id=>STATE.people[id]?.full_name).join(' → ')}
+Relationships:\n${rels}
+Reply JSON only: {"label":"e.g. चाचा-भतीजा (Uncle-Nephew)","explanation":"2 warm sentences in English using Hindi terms"}`);
+      ai=JSON.parse(raw.replace(/```json\n?/g,'').replace(/```/g,'').trim());
+    }catch(e){}
   }
-  const label=ai?.label||(path?`${path.length-1} step${path.length===2?'':'s'} apart`:'Not connected');
-  const expl=ai?.explanation||(path?`Connected through ${path.length-1} step${path.length===2?'':'s'} in the tree.`:`No path found yet. Add more interviews to fill the gaps.`);
+  think('conn-think',false);
+  const label=ai?.label||(path?`${path.length-1} sambandh apart`:'Connected नहीं मिले');
+  const expl=ai?.explanation||(path?`${pA.full_name} and ${pB.full_name} are connected through ${path.length-1} step(s).`:`No path found. Add more interviews to fill gaps.`);
   const ph=path?path.map((id,i)=>(i?'<span class="parr">→</span>':'')+`<span class="pnode ${i===0?'a':i===path.length-1?'b':''}">${esc(STATE.people[id]?.full_name||id)}</span>`).join(''):'<span class="pnode" style="color:var(--text3)">No path</span>';
-  document.getElementById('conn-result').innerHTML=`<div class="card"><div class="card-b"><div class="cbadge">${esc(label)}</div><div class="path">${ph}</div><div class="cexpl">${esc(expl)}</div></div></div>`;
+  document.getElementById('conn-result').innerHTML=`<div class="icard"><div class="icard-b"><div class="cbadge">${esc(label)}</div><div class="path">${ph}</div><div class="cexpl">${esc(expl)}</div></div></div>`;
 }
 
-// ── settings ──
+// ════════════════════════════════════════════════════════
+//  SETTINGS / AI
+// ════════════════════════════════════════════════════════
 function renderProviders(){
   const map={groq:'Groq',gemini:'Gemini',openai:'OpenAI',anthropic:'Anthropic',none:'No AI'};
   document.querySelectorAll('.pbtn').forEach(b=>b.classList.toggle('on',b.textContent.includes(map[STATE.aiProvider]||'###')));
-  document.getElementById('ai-key').value=STATE.aiKey; document.getElementById('ai-model').value=STATE.aiModel;
+  document.getElementById('ai-key').value=STATE.aiKey;
+  document.getElementById('ai-model').value=STATE.aiModel;
   document.getElementById('key-wrap').style.display=STATE.aiProvider==='none'?'none':'block';
 }
-function setProv(name,b){ STATE.aiProvider=name; saveAI(); document.querySelectorAll('.pbtn').forEach(x=>x.classList.remove('on')); b.classList.add('on'); document.getElementById('key-wrap').style.display=name==='none'?'none':'block'; }
-function saveAI(){ STATE.aiKey=document.getElementById('ai-key').value.trim(); STATE.aiModel=document.getElementById('ai-model').value.trim();
-  localStorage.setItem('ft_ai',JSON.stringify({p:STATE.aiProvider,k:STATE.aiKey,m:STATE.aiModel})); }
-function loadAI(){ try{const s=JSON.parse(localStorage.getItem('ft_ai')||'{}'); if(s.p)STATE.aiProvider=s.p; STATE.aiKey=s.k||''; STATE.aiModel=s.m||'';}catch(e){} }
-async function testAI(){ const el=document.getElementById('ai-test'); if(STATE.aiProvider==='none'){el.textContent='Rule parser — no key needed';el.style.color='var(--green)';return;}
+function setProv(name,b){STATE.aiProvider=name;saveAI();document.querySelectorAll('.pbtn').forEach(x=>x.classList.remove('on'));b.classList.add('on');document.getElementById('key-wrap').style.display=name==='none'?'none':'block';}
+function saveAI(){STATE.aiKey=document.getElementById('ai-key').value.trim();STATE.aiModel=document.getElementById('ai-model').value.trim();localStorage.setItem('ft_ai',JSON.stringify({p:STATE.aiProvider,k:STATE.aiKey,m:STATE.aiModel}));}
+function loadAI(){try{const s=JSON.parse(localStorage.getItem('ft_ai')||'{}');if(s.p)STATE.aiProvider=s.p;STATE.aiKey=s.k||'';STATE.aiModel=s.m||'';}catch(e){}}
+async function testAI(){const el=document.getElementById('ai-test');if(STATE.aiProvider==='none'){el.textContent='Rule parser ready';el.style.color='var(--green)';return;}
   el.textContent='Testing…';el.style.color='var(--text3)';
-  try{ const r=await callAI('Reply with only: {"ok":true}'); JSON.parse(r.replace(/```json\n?/g,'').replace(/```/g,'').trim()); el.textContent='✓ Connected';el.style.color='var(--green)'; }
-  catch(e){ el.textContent='✕ '+String(e.message).slice(0,50);el.style.color='var(--red)'; } }
+  try{const r=await callAI('Reply with only: {"ok":true}');JSON.parse(r.replace(/```json\n?/g,'').replace(/```/g,'').trim());el.textContent='✓ Connected';el.style.color='var(--green)';}
+  catch(e){el.textContent='✕ '+String(e.message).slice(0,50);el.style.color='var(--red)';}}
 
-// ── respondent (invite link) ──
+// ════════════════════════════════════════════════════════
+//  RESPONDENT SCREEN
+// ════════════════════════════════════════════════════════
 async function initRespond(token){
-  show('scr-respond'); buildForm('rsp-fields',true);
-  if(!configured()){ document.getElementById('rsp-fields').innerHTML=''; return note('rsp-notice','err','This link isn\'t set up yet — the owner needs to add database details.'); }
+  show('scr-respond');
+  // Build form
+  const fields=document.getElementById('rsp-fields');
+  fields.innerHTML=`<div class="rsec">आपके बारे में / About you</div>
+    <div><div class="qtag">आपका पूरा नाम / Your full name</div><input class="qin resp-name" placeholder="e.g. Ramesh Kumar Tiwari" style="min-height:unset;resize:none"></div>
+    <div><div class="qtag">भेजने वाले से रिश्ता / Relation to inviter</div><input class="qin resp-rel" placeholder="e.g. चाचाजी, cousin" style="min-height:unset;resize:none"></div>` +
+    QUESTIONS.map(([id,q,ph])=>`<div><div class="qtag">${q}</div><textarea class="qin resp-fq" data-q="${id}" placeholder="${ph}"></textarea></div>`).join('');
+
+  // Load invite metadata
   try{
-    const rows=await api('GET',`invites?token=eq.${token}&select=*`);
-    if(!rows.length) return failResp('This invite link is invalid.');
-    if(rows[0].used) return failResp('This link has already been used. Ask for a new one.');
-    respInvite=rows[0];
-    const trees=CONFIG.TREE_NAME; document.getElementById('rsp-tree').textContent=trees+' — Interview';
-  }catch(e){ failResp('Could not load invite: '+e.message); }
+    // Try to get Supabase config from URL params or saved
+    const saved=JSON.parse(localStorage.getItem('ft_cfg')||'{}');
+    if(saved.sbUrl){CFG.sbUrl=saved.sbUrl;CFG.sbKey=saved.sbKey;CFG.treeId=saved.treeId;CFG.treeName=saved.treeName;CFG.demo=saved.demo;}
+    const rows=await sbGet('invites',`?token=eq.${token}`);
+    if(!rows.length){return respFail('This invite link is invalid.');}
+    if(rows[0].used){return respFail('This link has already been used.');}
+    respInvite=rows[0]; CFG.treeId=rows[0].tree_id;
+    const trees=await sbGet('trees',`?id=eq.${CFG.treeId}`);
+    document.getElementById('rsp-tn').textContent=(trees[0]?.name||'Family Tree')+' — Interview';
+  }catch(e){document.getElementById('rsp-tn').textContent='Family Tree';}
 }
-function failResp(msg){ document.getElementById('rsp-form').style.display='none'; note('rsp-notice','err',msg); document.getElementById('rsp-notice').classList.add('on'); document.getElementById('rsp-form').style.display='block'; document.getElementById('rsp-fields').innerHTML=''; document.getElementById('rsp-submit').style.display='none'; }
+function respFail(msg){document.getElementById('rsp-submit').style.display='none';note('rsp-notice','err',msg);}
 async function submitResponse(){
-  const name=document.querySelector('#rsp-fields .nm-name').value.trim();
-  if(!name) return note('rsp-notice','err','Please enter your name.');
-  const ans=collectForm('rsp-fields'); const rel=document.querySelector('#rsp-fields .nm-rel').value.trim();
+  const name=(document.querySelector('.resp-name')?.value||'').trim();
+  if(!name)return note('rsp-notice','err','अपना नाम डालें।');
+  const ans={};document.querySelectorAll('.resp-fq').forEach(t=>ans[t.dataset.q]=t.value.trim());
+  const rel=(document.querySelector('.resp-rel')?.value||'').trim();
   btn('rsp-submit',true,'Saving…');
   try{
-    await api('POST','interviews',{respondent_name:name,relation_to_owner:rel,raw_answers:ans,status:'pending'});
-    if(respInvite) await api('PATCH',`invites?id=eq.${respInvite.id}`,{used:true,used_at:new Date().toISOString()});
-    document.getElementById('rsp-form').style.display='none'; document.getElementById('rsp-thanks').style.display='block';
-  }catch(e){ note('rsp-notice','err','Error saving: '+e.message); btn('rsp-submit',false,'Submit my answers →'); }
+    await sbPost('interviews',{tree_id:CFG.treeId,respondent_name:name,relation_to_owner:rel,raw_answers:ans,status:'pending'});
+    if(respInvite)await sbPatch('invites',`?id=eq.${respInvite.id}`,{used:true,used_at:new Date().toISOString()});
+    document.getElementById('rsp-form').style.display='none';
+    document.getElementById('rsp-thanks').style.display='block';
+  }catch(e){note('rsp-notice','err','Error: '+e.message);btn('rsp-submit',false,'Submit →');}
 }
 
-// ── shared form builder ──
-function buildForm(containerId,isRespondent){
-  const youLabel=isRespondent?'Your full name':'Their name';
-  const relLabel=isRespondent?'Your relation to the inviter':'Their relation to you (or "self")';
-  let html=`<div class="card"><div class="card-h"><div class="card-t">${isRespondent?'About you':'Who is this about?'}</div><div class="badge">Required</div></div>
-    <div class="card-b"><div class="row2">
-      <div><div class="qtag">${youLabel}</div><input class="in nm-name" placeholder="Full name"></div>
-      <div><div class="qtag">${relLabel}</div><input class="in nm-rel" placeholder="${isRespondent?'e.g. Uncle, cousin':'e.g. Paternal uncle'}"></div>
-    </div></div></div>`;
-  QUESTIONS.forEach(([id,q,ph])=>{ html+=`<div class="card"><div class="card-b"><div><div class="qtag">${q}</div><textarea class="in fq" data-q="${id}" placeholder="${ph}"></textarea></div></div></div>`; });
-  document.getElementById(containerId).innerHTML=html;
-}
-function collectForm(containerId){ const o={}; document.querySelectorAll(`#${containerId} .fq`).forEach(t=>o[t.dataset.q]=t.value.trim()); return o; }
-function fillDemo(){
-  const f=document.getElementById('iv-form'); f.querySelector('.nm-name').value='Ramesh Kumar Tiwari'; f.querySelector('.nm-rel').value='Paternal uncle';
-  const vals={q1:'Full name Ramesh Kumar Tiwari, called Ramesh bhaiya.',q2:'Born 1962 in Basahi village near Prayagraj. Moved to Naini after marriage.',q3:'Government school teacher for 28 years. Retired 2020.',q4:'Father Shivram Tiwari, born 1930 Basahi, farmer, passed 1998. Mother Savitri Devi, alive, ~85.',q5:'Paternal grandfather Harishankar Tiwari. Grandmother Devki Devi, passed before I was born.',q6:'Elder brother Suresh Tiwari, born ~1957, in Naini. Younger brother Mahesh Tiwari, born 1967.',q7:'Married Sunita Devi since 1988. Son Ankit Tiwari born 1991, software engineer in Lucknow.',q8:'Shivani is my brother Suresh\'s daughter — my bhatiji.',q9:'Cousin Devendra Tiwari in Lucknow.'};
-  f.querySelectorAll('.fq').forEach(t=>t.value=vals[t.dataset.q]||'');
-  note('iv-notice','info','Demo answers loaded — click Parse.');
-}
-function clearForm(){ const f=document.getElementById('iv-form'); f.querySelector('.nm-name').value=''; f.querySelector('.nm-rel').value=''; f.querySelectorAll('.fq').forEach(t=>t.value=''); document.getElementById('iv-result').innerHTML=''; }
-
-// ── demo seed ──
+// ════════════════════════════════════════════════════════
+//  DEMO SEED
+// ════════════════════════════════════════════════════════
 function seedDemo(){
-  const P=[['Satyam',1996,'UP','Professional',false],['Suresh Tiwari',1957,'Basahi, UP','Farmer',false],['Sunita Tiwari',1960,'Naini','Homemaker',false],['Ramesh Kumar Tiwari',1962,'Basahi, UP','Teacher',false],['Shivram Tiwari',1930,'Basahi, UP','Farmer',true],['Savitri Devi',1935,'UP','Homemaker',false],['Ankit Tiwari',1991,'Naini','Engineer',false],['Shivani',1998,'Prayagraj','Professional',false]];
-  const ids={}; const people=P.map(([n,y,pl,oc,d])=>{const id=crypto.randomUUID();ids[n]=id;return{id,created_at:new Date().toISOString(),full_name:n,birth_year:y,birth_place:pl,occupation:oc,is_deceased:d,gender:'unknown'};});
-  const R=[['Shivram Tiwari','Suresh Tiwari','PARENT_OF','father of'],['Shivram Tiwari','Ramesh Kumar Tiwari','PARENT_OF','father of'],['Savitri Devi','Suresh Tiwari','PARENT_OF','mother of'],['Shivram Tiwari','Savitri Devi','SPOUSE_OF','married to'],['Suresh Tiwari','Sunita Tiwari','SPOUSE_OF','married to'],['Suresh Tiwari','Shivani','PARENT_OF','father of'],['Sunita Tiwari','Shivani','PARENT_OF','mother of'],['Ramesh Kumar Tiwari','Ankit Tiwari','PARENT_OF','father of'],['Suresh Tiwari','Ramesh Kumar Tiwari','SIBLING_OF','brother of'],['Shivani','Satyam','SPOUSE_OF','engaged to']];
-  const rels=R.map(([a,b,t,l])=>({id:crypto.randomUUID(),from_id:ids[a],to_id:ids[b],type:t,label:l}));
-  localStorage.setItem('ftd_people',JSON.stringify(people));
-  localStorage.setItem('ftd_relationships',JSON.stringify(rels));
-  localStorage.setItem('ftd_invites','[]'); localStorage.setItem('ftd_interviews','[]');
+  const P=[
+    {id:'p-hari',full_name:'Harishankar Tiwari',birth_year:1900,birth_place:'Basahi',occupation:'Farmer',is_deceased:true,gender:'male'},
+    {id:'p-devki',full_name:'Devki Devi',birth_year:1905,birth_place:'UP',occupation:'Homemaker',is_deceased:true,gender:'female'},
+    {id:'p-shivram',full_name:'Shivram Tiwari',birth_year:1930,birth_place:'Basahi, UP',occupation:'Farmer',is_deceased:true,gender:'male'},
+    {id:'p-savitri',full_name:'Savitri Devi',birth_year:1935,birth_place:'UP',occupation:'Homemaker',is_deceased:false,gender:'female'},
+    {id:'p-suresh',full_name:'Suresh Tiwari',birth_year:1957,birth_place:'Basahi, UP',occupation:'Farmer',is_deceased:false,gender:'male'},
+    {id:'p-ramesh',full_name:'Ramesh Kumar Tiwari',birth_year:1962,birth_place:'Basahi, UP',occupation:'School Teacher',is_deceased:false,gender:'male'},
+    {id:'p-mahesh',full_name:'Mahesh Tiwari',birth_year:1967,birth_place:'Basahi, UP',occupation:'Business',is_deceased:false,gender:'male'},
+    {id:'p-sunita',full_name:'Sunita Tiwari',birth_year:1960,birth_place:'Naini',occupation:'Homemaker',is_deceased:false,gender:'female'},
+    {id:'p-satyam',full_name:'Satyam Tiwari',birth_year:1996,birth_place:'UP',occupation:'Professional',is_deceased:false,gender:'male'},
+    {id:'p-shivani',full_name:'Shivani',birth_year:1998,birth_place:'Prayagraj',occupation:'Professional',is_deceased:false,gender:'female'},
+    {id:'p-ankit',full_name:'Ankit Tiwari',birth_year:1991,birth_place:'Naini',occupation:'Software Engineer',is_deceased:false,gender:'male'},
+    {id:'p-sunitar',full_name:'Sunita Devi (Ramesh)',birth_year:1964,birth_place:'Prayagraj',occupation:'Homemaker',is_deceased:false,gender:'female'},
+  ].map(p=>({...p,created_at:new Date().toISOString(),tree_id:'demo',source:'demo',confidence:1.0}));
+  const R=[
+    {from_id:'p-hari',to_id:'p-shivram',type:'PARENT_OF',label:'दादाजी'},
+    {from_id:'p-devki',to_id:'p-shivram',type:'PARENT_OF',label:'दादीजी'},
+    {from_id:'p-hari',to_id:'p-devki',type:'SPOUSE_OF',label:'पत्नी'},
+    {from_id:'p-shivram',to_id:'p-suresh',type:'PARENT_OF',label:'पिताजी'},
+    {from_id:'p-shivram',to_id:'p-ramesh',type:'PARENT_OF',label:'पिताजी'},
+    {from_id:'p-shivram',to_id:'p-mahesh',type:'PARENT_OF',label:'पिताजी'},
+    {from_id:'p-savitri',to_id:'p-suresh',type:'PARENT_OF',label:'माताजी'},
+    {from_id:'p-savitri',to_id:'p-ramesh',type:'PARENT_OF',label:'माताजी'},
+    {from_id:'p-savitri',to_id:'p-mahesh',type:'PARENT_OF',label:'माताजी'},
+    {from_id:'p-shivram',to_id:'p-savitri',type:'SPOUSE_OF',label:'पत्नी'},
+    {from_id:'p-suresh',to_id:'p-sunita',type:'SPOUSE_OF',label:'पत्नी'},
+    {from_id:'p-ramesh',to_id:'p-sunitar',type:'SPOUSE_OF',label:'पत्नी'},
+    {from_id:'p-suresh',to_id:'p-shivani',type:'PARENT_OF',label:'पिताजी'},
+    {from_id:'p-sunita',to_id:'p-shivani',type:'PARENT_OF',label:'माताजी'},
+    {from_id:'p-ramesh',to_id:'p-ankit',type:'PARENT_OF',label:'पिताजी'},
+    {from_id:'p-sunitar',to_id:'p-ankit',type:'PARENT_OF',label:'माताजी'},
+    {from_id:'p-suresh',to_id:'p-ramesh',type:'SIBLING_OF',label:'भाई'},
+    {from_id:'p-suresh',to_id:'p-mahesh',type:'SIBLING_OF',label:'भाई'},
+    {from_id:'p-shivani',to_id:'p-satyam',type:'SPOUSE_OF',label:'पति'},
+  ].map((r,i)=>({...r,id:'r-'+i,created_at:new Date().toISOString(),tree_id:'demo',confidence:1.0}));
+  localStorage.setItem('ftd_people',JSON.stringify(P));
+  localStorage.setItem('ftd_relationships',JSON.stringify(R));
+  localStorage.setItem('ftd_invites','[]');
+  localStorage.setItem('ftd_interviews','[]');
 }
 
-// ── utils ──
-const COLORS={ancestor:'#8f7ed4',self:'#c9935a',sibling:'#5aaa7a',child:'#5a8fd4',spouse:'#d4a05a',other:'#665f59'};
-function color(p){ if(!p)return COLORS.other; if(norm(p.full_name)===norm(CONFIG.ROOT_PERSON))return COLORS.self;
+// ════════════════════════════════════════════════════════
+//  UTILS
+// ════════════════════════════════════════════════════════
+const COLORS={ancestor:'#6c5fc7',self:'#e8792a',sibling:'#3d8f5f',child:'#2a6fad',spouse:'#c9935a',other:'#a09890'};
+function nodeColor(p){
+  if(!p)return COLORS.other;
+  if(norm(p.full_name)===norm(CFG.rootPerson))return COLORS.self;
   const ts=STATE.rels.filter(r=>r.from_id===p.id||r.to_id===p.id).map(r=>(r.type||'').toUpperCase());
   if(ts.some(t=>t.includes('PARENT')||t.includes('GRAND')))return COLORS.ancestor;
   if(ts.some(t=>t.includes('CHILD')))return COLORS.child;
   if(ts.some(t=>t.includes('SIBLING')||t.includes('COUSIN')))return COLORS.sibling;
-  if(ts.some(t=>t.includes('SPOUSE')))return COLORS.spouse; return COLORS.other; }
-function initials(n){ return n?n.split(' ').map(w=>w[0]||'').join('').toUpperCase().slice(0,2):'?'; }
-function norm(s){ return (s||'').toLowerCase().replace(/[^a-z]/g,' ').replace(/\s+/g,' ').trim(); }
-function esc(s){ return s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'):''; }
-function show(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on')); document.getElementById(id).classList.add('on'); }
-function set(id,v){ const e=document.getElementById(id); if(e)e.textContent=v; }
-function btn(id,d,t){ const e=document.getElementById(id); if(e){e.disabled=d;if(t)e.textContent=t;} }
-function note(id,type,msg){ const e=document.getElementById(id); e.className=`notice ${type} on`; e.textContent=msg; if(type==='ok')setTimeout(()=>e.classList.remove('on'),4000); }
+  if(ts.some(t=>t.includes('SPOUSE')))return COLORS.spouse;
+  return COLORS.other;
+}
+function initials(n){return n?n.split(' ').map(w=>w[0]||'').join('').toUpperCase().slice(0,2):'?';}
+function norm(s){return(s||'').toLowerCase().replace(/[^a-z]/g,' ').replace(/\s+/g,' ').trim();}
+function esc(s){return s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'):''}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));document.getElementById(id).classList.add('on');}
+function set(id,v){const e=document.getElementById(id);if(e)e.textContent=v;}
+function btn(id,d,t){const e=document.getElementById(id);if(e){e.disabled=d;if(t)e.textContent=t;}}
+function note(id,type,msg){const e=document.getElementById(id);e.className=`notice ${type} on`;e.textContent=msg;if(type==='ok')setTimeout(()=>e.classList.remove('on'),4000);}
+function think(id,on,msg=''){const e=document.getElementById(id);e.classList.toggle('on',on);const l=document.getElementById('tlog');if(l&&msg)l.textContent=msg;}
 </script>
 </body>
 </html>
+HTMLEOF
+echo "done: $(wc -l < /home/claude/familytree/family-tree-v2.html) lines"
