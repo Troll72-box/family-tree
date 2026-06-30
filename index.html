@@ -46,14 +46,11 @@ textarea.in{resize:vertical;min-height:44px}
 .nt.ok{background:var(--gnd);color:var(--gn);border:1px solid rgba(74,140,99,.25)}
 .nt.err{background:var(--rdd);color:var(--rd);border:1px solid rgba(192,70,58,.2)}
 .nt.inf{background:var(--acd);color:var(--ac);border:1px solid var(--acb)}
-/* setup */
 #scr-setup{align-items:center;justify-content:center;padding:1.5rem;background:linear-gradient(135deg,#fff8ee,#f3efe6)}
 .box{background:var(--sur);border:1px solid var(--bdrs);border-radius:18px;padding:2rem;width:100%;max-width:480px;box-shadow:var(--sh)}
 .code{font-family:'SF Mono','Fira Code',monospace;font-size:11px;background:var(--acd);border:1px solid var(--acb);border-radius:4px;padding:1px 5px;color:var(--ac)}
 .steps{font-size:12px;color:var(--tx2);background:var(--sur2);border-radius:10px;padding:.8rem 1rem;line-height:2;margin-top:.5rem}
-/* sync banner */
 #sync-banner{display:none;background:var(--rdd);color:var(--rd);border-bottom:1px solid rgba(192,70,58,.2);font-size:11px;padding:5px 1rem;text-align:center}
-/* topbar */
 .topbar{height:48px;background:var(--sur);border-bottom:1px solid var(--bdr);display:flex;align-items:center;padding:0 1rem;gap:.7rem;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.05)}
 .tnm{font-size:14px;font-weight:700}
 .tdv{width:1px;height:20px;background:var(--bdrs)}
@@ -63,10 +60,9 @@ textarea.in{resize:vertical;min-height:44px}
 .tsp{flex:1}
 .tst{font-size:11px;color:var(--tx2);font-family:'SF Mono','Fira Code',monospace}.tst b{color:var(--tx)}
 .tac{padding:5px 12px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;background:var(--ac);color:#fff;border:none}.tac:hover{opacity:.88}
-/* shell */
 .shell{display:flex;flex:1;overflow:hidden;height:calc(100vh - 48px)}
 .side{width:208px;flex-shrink:0;background:var(--sur);border-right:1px solid var(--bdr);display:flex;flex-direction:column;overflow-y:auto}
-.ssin{width:100%;background:var(--sur2);border:1px solid var(--bdr);border-radius:7px;color:var(--tx);font-size:12px;padding:6px 9px;outline:none;margin:.6rem .7rem;width:calc(100% - 1.4rem)}
+.ssin{background:var(--sur2);border:1px solid var(--bdr);border-radius:7px;color:var(--tx);font-size:12px;padding:6px 9px;outline:none;margin:.6rem .7rem;width:calc(100% - 1.4rem)}
 .ssin:focus{border-color:var(--ac)}
 .slbl{font-size:9px;text-transform:uppercase;letter-spacing:.09em;color:var(--tx3);padding:.4rem .7rem .2rem}
 .prow{display:flex;align-items:center;gap:7px;padding:5px .7rem;cursor:pointer;transition:background .1s}
@@ -74,7 +70,6 @@ textarea.in{resize:vertical;min-height:44px}
 .pav{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
 .pn{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pm{font-size:10px;color:var(--tx3)}
-/* canvas */
 .canvas{flex:1;position:relative;overflow:hidden}
 .panel{position:absolute;inset:0;overflow-y:auto;display:none}.panel.on{display:block}
 #p-tree{overflow:hidden;background:radial-gradient(circle at 50% 0%,#fbf8f1 0%,var(--bg) 70%)}
@@ -82,7 +77,6 @@ textarea.in{resize:vertical;min-height:44px}
 #tc{position:absolute;top:0;left:0;transform-origin:0 0}
 #ts{position:absolute;top:0;left:0;overflow:visible;pointer-events:none}
 .wrap{max-width:700px;margin:0 auto;padding:1.5rem 1.5rem 3rem}
-/* person card */
 .pc{position:absolute;width:var(--cw);background:var(--sur);border:1.5px solid var(--bdr);border-radius:13px;box-shadow:var(--sh);cursor:pointer;overflow:hidden;user-select:none;transition:box-shadow .15s,border-color .15s,transform .1s}
 .pc:hover{box-shadow:var(--shh);transform:translateY(-2px)}
 .pc.root{border:2px solid var(--ac)}
@@ -93,14 +87,12 @@ textarea.in{resize:vertical;min-height:44px}
 .pcn{font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pcr{font-size:9px;color:var(--ac);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
 .pcy{font-size:9px;color:var(--tx3);margin-top:1px}
-/* tree controls */
 .tctl{position:absolute;bottom:1.25rem;right:1.25rem;display:flex;flex-direction:column;gap:5px;z-index:10}
 .tcb{width:30px;height:30px;border-radius:7px;background:var(--sur);border:1px solid var(--bdrs);color:var(--tx2);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:var(--sh)}
 .tcb:hover{background:var(--sur2)}
 .tleg{position:absolute;top:1rem;left:1rem;background:rgba(255,255,255,.93);backdrop-filter:blur(6px);border:1px solid var(--bdr);border-radius:10px;padding:.45rem .8rem;display:flex;flex-direction:column;gap:4px;box-shadow:var(--sh)}
 .li{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--tx2)}
 .ldot{width:7px;height:7px;border-radius:50%}
-/* result cards for parsed people */
 .rg{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.6rem;margin-top:.7rem}
 .rc{background:var(--sur2);border:1px solid var(--bdr);border-radius:9px;padding:.7rem}
 .rc.new{border-color:var(--acb);background:var(--acd)}
@@ -112,7 +104,6 @@ textarea.in{resize:vertical;min-height:44px}
 .rcd{font-size:10px;color:var(--tx3);margin-top:2px}
 .smry{margin-top:1rem;padding:.8rem;background:var(--acd);border:1px solid var(--acb);border-radius:9px;font-size:12px;color:var(--tx2);line-height:1.7}
 .smry b{font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:var(--ac);display:block;margin-bottom:3px}
-/* invite/response cards */
 .lcard{background:var(--sur);border:1px solid var(--bdr);border-radius:10px;padding:.8rem 1rem;margin-bottom:.6rem;box-shadow:var(--sh)}
 .lct{display:flex;align-items:center;justify-content:space-between;margin-bottom:.4rem}
 .ist{font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;text-transform:uppercase}
@@ -123,7 +114,6 @@ textarea.in{resize:vertical;min-height:44px}
 .cpb{padding:5px 10px;border-radius:6px;font-size:10px;font-weight:600;cursor:pointer;background:var(--sur2);border:1px solid var(--bdrs);color:var(--tx2)}
 .cpb:hover{background:var(--sur3)}.cpb.done{color:var(--gn)}
 .meta{font-size:10px;color:var(--tx3);margin-top:4px}
-/* insights */
 .mg{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:.7rem;margin-bottom:1.5rem}
 .mc{background:var(--sur);border:1px solid var(--bdr);border-radius:10px;padding:.8rem 1rem;box-shadow:var(--sh)}
 .mv{font-size:26px;font-weight:700;font-family:'SF Mono','Fira Code',monospace;letter-spacing:-.03em}
@@ -134,7 +124,6 @@ textarea.in{resize:vertical;min-height:44px}
 .bar{display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem}
 .bl{font-size:10px;color:var(--tx2);min-width:84px;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .bt{flex:1;height:5px;background:var(--sur3);border-radius:3px}.bf{height:100%;border-radius:3px}.bn{font-size:10px;color:var(--tx3);min-width:14px}
-/* connection */
 .csel{display:grid;grid-template-columns:1fr auto 1fr;gap:.8rem;align-items:end;margin-bottom:1rem}
 .cbadge{display:inline-block;padding:4px 14px;border-radius:20px;font-size:13px;font-weight:700;background:var(--acd);border:1px solid var(--acb);color:var(--ac);margin-bottom:.8rem}
 .path{display:flex;flex-wrap:wrap;align-items:center;gap:.35rem;margin-bottom:1rem}
@@ -143,11 +132,9 @@ textarea.in{resize:vertical;min-height:44px}
 .pnode.b{background:var(--gnd);border-color:rgba(74,140,99,.3);color:var(--gn)}
 .parr{color:var(--tx3)}
 .cexpl{font-size:12px;color:var(--tx2);line-height:1.75;padding:.8rem;background:var(--sur2);border-radius:8px}
-/* providers */
 .pg{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:.5rem;margin-bottom:.8rem}
 .pb{padding:8px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--bdrs);background:var(--sur2);color:var(--tx2);text-align:center}
 .pb:hover{background:var(--sur3)}.pb.on{border-color:var(--acb);background:var(--acd);color:var(--ac)}
-/* profile drawer */
 .pov{position:fixed;inset:0;z-index:300;pointer-events:none;display:flex;align-items:flex-start;justify-content:flex-end;padding:3.5rem 1rem 1rem}
 .ppa{background:var(--sur);border:1px solid var(--bdrs);border-radius:14px;width:292px;pointer-events:all;transform:translateX(320px);transition:transform .2s;box-shadow:0 10px 36px rgba(0,0,0,.17);max-height:calc(100vh - 5rem);overflow-y:auto}
 .ppa.open{transform:translateX(0)}
@@ -168,7 +155,6 @@ textarea.in{resize:vertical;min-height:44px}
 .rsel{background:var(--sur2);border:1px solid var(--bdrs);border-radius:5px;color:var(--tx);font-size:10px;padding:3px 4px;outline:none;max-width:106px}
 .rx{cursor:pointer;color:var(--tx3);font-size:14px;padding:0 3px;border:none;background:none;line-height:1}.rx:hover{color:var(--rd)}
 .ppst{font-size:10px;margin-top:5px;min-height:14px}
-/* respond */
 #scr-respond{align-items:center;justify-content:center;padding:1.5rem;min-height:100vh;height:auto;overflow-y:auto;background:linear-gradient(135deg,#fff8ee,#f3efe6)}
 .rbox{background:var(--sur);border:1px solid var(--bdrs);border-radius:16px;width:100%;max-width:540px;overflow:hidden;box-shadow:var(--sh)}
 .rbox-h{padding:1.4rem 1.4rem 1rem;border-bottom:1px solid var(--bdr)}
@@ -180,9 +166,7 @@ textarea.in{resize:vertical;min-height:44px}
 </head>
 <body>
 
-<!-- SETUP -->
 <div class="screen" id="scr-setup">
-  <div style="display:flex;align-items:center;justify-content:center;flex:1;padding:1.5rem;background:linear-gradient(135deg,#fff8ee,#f3efe6)">
   <div class="box">
     <div style="font-size:36px;margin-bottom:.5rem">🌳</div>
     <div class="h1">Almost ready</div>
@@ -193,12 +177,11 @@ textarea.in{resize:vertical;min-height:44px}
       <b>3.</b> Settings → API Keys → copy URL + publishable key into CONFIG
     </div>
     <button class="btn btn-s btn-f" style="margin-top:1.2rem" onclick="startDemo()">Try the demo (no setup needed)</button>
-  </div></div>
+  </div>
 </div>
 
-<!-- APP -->
 <div class="screen" id="scr-app">
-  <div id="sync-banner">⚠ Some changes couldn't be saved to the server — data is kept locally. Check Settings → Database or reload to retry.</div>
+  <div id="sync-banner">⚠ Some changes couldn't be saved to the server — they're kept on this device. Check Settings → Database, or reload to retry.</div>
   <nav class="topbar">
     <span style="font-size:20px">🌳</span>
     <span class="tnm" id="tname">Parivaar</span>
@@ -223,8 +206,6 @@ textarea.in{resize:vertical;min-height:44px}
       <div id="side-list"></div>
     </aside>
     <div class="canvas">
-
-      <!-- TREE -->
       <div class="panel on" id="p-tree">
         <div id="tv"><div id="tc"><svg id="ts"></svg></div></div>
         <div class="tleg">
@@ -235,16 +216,20 @@ textarea.in{resize:vertical;min-height:44px}
         <div class="tctl">
           <button class="tcb" onclick="zIn()">+</button>
           <button class="tcb" onclick="zOut()">−</button>
-          <button class="tcb" onclick="fitTree()" title="Fit to screen" style="font-size:11px">⌂</button>
+          <button class="tcb" onclick="fitTree()" title="Fit" style="font-size:11px">⌂</button>
         </div>
       </div>
 
-      <!-- ADD PERSON -->
       <div class="panel" id="p-add">
         <div class="wrap">
           <div class="ey">Add to your tree</div>
           <div class="h1">Add a person</div>
-          <div class="sub">Enter names for parents, siblings, spouse, children — the AI extracts and links everyone. Add details later by clicking a card.</div>
+          <div class="sub">Enter names for parents, siblings, spouse, children — everyone gets extracted and linked. Siblings who share a parent, and cousins who share a grandparent, are connected automatically.</div>
+          <div class="card" style="border-color:var(--acb)"><div class="cb">
+            <div class="ct">Quick start: load your family</div>
+            <div style="font-size:12px;color:var(--tx2);line-height:1.6">One click seeds Satyam, parents, brothers, grandparents, and the Rajesh Tiwari branch — all correctly linked — so you can see the structure immediately.</div>
+            <div><button class="btn btn-a" onclick="seedMyFamily()">Load my starter family →</button></div>
+          </div></div>
           <div id="iv-form"></div>
           <div class="brow">
             <button class="btn btn-a" id="parse-btn" onclick="ownerParse()">Add to tree →</button>
@@ -256,7 +241,6 @@ textarea.in{resize:vertical;min-height:44px}
         </div>
       </div>
 
-      <!-- RESPONSES -->
       <div class="panel" id="p-responses">
         <div class="wrap">
           <div class="ey">From invite links</div>
@@ -268,14 +252,13 @@ textarea.in{resize:vertical;min-height:44px}
         </div>
       </div>
 
-      <!-- INVITES -->
       <div class="panel" id="p-invites">
         <div class="wrap">
           <div class="ey">Shareable links</div>
           <div class="h1">Invite someone</div>
           <div class="sub">Share a link with any relative — they fill it in, you process it, it joins your tree.</div>
           <div class="card"><div class="cb"><div style="display:flex;gap:.5rem;align-items:flex-end">
-            <input class="in" id="inv-lbl" placeholder="Label — e.g. 'For Uncle Ramesh'">
+            <input class="in" id="inv-lbl" placeholder="Label — e.g. 'For Uncle Rajesh'">
             <button class="btn btn-a" onclick="createInvite()" style="white-space:nowrap">Generate</button>
           </div></div></div>
           <div class="slbl" style="margin:.7rem 0 .4rem">Active links</div>
@@ -283,7 +266,6 @@ textarea.in{resize:vertical;min-height:44px}
         </div>
       </div>
 
-      <!-- INSIGHTS -->
       <div class="panel" id="p-insights">
         <div class="wrap">
           <div class="ey">Patterns</div>
@@ -293,7 +275,6 @@ textarea.in{resize:vertical;min-height:44px}
         </div>
       </div>
 
-      <!-- CONNECTIONS -->
       <div class="panel" id="p-connect">
         <div class="wrap">
           <div class="ey">Relationship finder</div>
@@ -311,7 +292,6 @@ textarea.in{resize:vertical;min-height:44px}
         </div>
       </div>
 
-      <!-- SETTINGS -->
       <div class="panel" id="p-settings">
         <div class="wrap">
           <div class="ey">Configuration</div>
@@ -333,9 +313,9 @@ textarea.in{resize:vertical;min-height:44px}
           <div class="card"><div class="cb">
             <div class="ct">Database</div>
             <div style="font-size:12px;color:var(--tx2)" id="db-status">Checking…</div>
-            <div style="margin-top:.5rem;display:flex;gap:.5rem;align-items:center">
+            <div style="margin-top:.5rem;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
+              <button class="btn btn-s" onclick="loadAll()">Reload from server</button>
               <button class="btn btn-s" style="color:var(--rd)" onclick="wipeAll()">Clear entire tree</button>
-              <span style="font-size:11px;color:var(--tx3)">Removes all people and links.</span>
             </div>
           </div></div>
         </div>
@@ -344,7 +324,6 @@ textarea.in{resize:vertical;min-height:44px}
   </div>
 </div>
 
-<!-- PROFILE PANEL -->
 <div class="pov" id="pov">
   <div class="ppa" id="ppa">
     <div class="pp-h">
@@ -358,9 +337,7 @@ textarea.in{resize:vertical;min-height:44px}
   </div>
 </div>
 
-<!-- RESPONDENT -->
 <div class="screen" id="scr-respond">
-  <div style="display:flex;align-items:center;justify-content:center;flex:1;padding:1.5rem;background:linear-gradient(135deg,#fff8ee,#f3efe6)">
   <div class="rbox">
     <div class="rbox-h">
       <div class="ey" id="rsp-tn">Family Tree — Interview</div>
@@ -377,58 +354,42 @@ textarea.in{resize:vertical;min-height:44px}
       <div class="h1">Thank you!</div>
       <div style="font-size:13px;color:var(--tx2);margin-top:6px">Your answers were saved and will be added to the family tree.</div>
     </div>
-  </div></div>
+  </div>
 </div>
 
 <script>
-// ════════════════════════════════════════════════════════
-//  ⚙️  CONFIG — paste your Supabase details, then re-deploy
-// ════════════════════════════════════════════════════════
 const CONFIG = {
   SB_URL:    'https://njpvyqbmfhpzrpypoaaz.supabase.co',
   SB_KEY:    'sb_publishable_YbsqWeQKad1Ry-PCAdhcTA_1BsZEV10',
   TREE_NAME: 'Tiwari Family',
-  ROOT:      'Satyam Tiwari',   // your name, exactly as in the tree
+  ROOT:      'Satyam Tiwari',
 };
-// ════════════════════════════════════════════════════════
 
 const QUESTIONS=[
-  ['parents','Parents — father and mother names','Father: Shivram Tiwari · Mother: Savitri Devi'],
-  ['siblings','Brothers & sisters — names only','Suresh Tiwari, Mahesh Tiwari'],
-  ['spouse','Spouse — name (if any)','Sunita Devi'],
-  ['children','Children — names (if any)','Ankit, Diksha'],
-  ['extra','Any other relatives to mention?','Grandparents: Harishankar Tiwari, Devki Devi'],
+  ['parents','Parents — father and mother names','Father: Bambeshwari Tiwari, Mother: Seema Tiwari'],
+  ['siblings','Brothers & sisters — names only','Shivam Tiwari, Shubham Tiwari'],
+  ['spouse','Spouse — name (if any)',''],
+  ['children','Children — names (if any)',''],
+  ['grandparents','Grandparents — names (if any)','Phoolchandra Tiwari, Girjavati Devi'],
+  ['extra','Any other relatives to mention?',''],
 ];
 const REL_KINDS=[['parent','Parent of'],['child','Child of'],['spouse','Spouse of'],['sibling','Sibling of']];
 
-// ── STATE ──
 let STATE={people:{},rels:[],invites:[],pending:[],demo:false,aiProvider:'groq',aiKey:'',aiModel:''};
 let parseResult=null,respInvite=null;
-let tX=0,tY=0,tZ=1,fitted=false,dragging=false,dsx=0,dsy=0,dStart=false;
+let tX=0,tY=0,tZ=1,fitted=false,dragging=false,dsx=0,dsy=0;
 let editingId=null,editMode=false;
 
-// ── localStorage safety net ──
-// Every mutation saves to cache; data can never be lost from the UI.
-function saveCache(){
-  if(STATE.demo)return;
-  try{localStorage.setItem('ft_v2',JSON.stringify({p:STATE.people,r:STATE.rels,i:STATE.invites,ts:Date.now()}));}catch(e){}
-}
-function loadCache(){
-  try{
-    const c=JSON.parse(localStorage.getItem('ft_v2')||'{}');
-    if(c.p&&Object.keys(c.p).length){STATE.people=c.p;STATE.rels=c.r||[];STATE.invites=c.i||[];return true;}
-  }catch(e){}
-  return false;
-}
+const $=id=>document.getElementById(id);
+const val=id=>($(id)?.value||'').trim();
+const avg=a=>a.length?a.reduce((s,v)=>s+v,0)/a.length:0;
+const configured=()=>CONFIG.SB_URL.startsWith('http')&&CONFIG.SB_KEY.length>10;
+
+function saveCache(){ if(STATE.demo)return; try{localStorage.setItem('ft_v3',JSON.stringify({p:STATE.people,r:STATE.rels,i:STATE.invites}));}catch(e){} }
+function loadCache(){ try{const c=JSON.parse(localStorage.getItem('ft_v3')||'{}');if(c.p&&Object.keys(c.p).length){STATE.people=c.p;STATE.rels=c.r||[];STATE.invites=c.i||[];return true;}}catch(e){} return false; }
 function showSyncBanner(){$('sync-banner').style.display='block';}
 function hideSyncBanner(){$('sync-banner').style.display='none';}
 
-const configured=()=>CONFIG.SB_URL.startsWith('http')&&CONFIG.SB_KEY.length>10;
-const $=id=>document.getElementById(id);
-const val=id=>($( id)?.value||'').trim();
-const avg=a=>a.length?a.reduce((s,v)=>s+v,0)/a.length:0;
-
-// ── boot ──
 (function(){
   const tok=new URLSearchParams(location.search).get('invite');
   loadAI();
@@ -441,14 +402,11 @@ function startDemo(){STATE.demo=true;seedDemo();startApp();}
 async function startApp(){
   show('scr-app');$('tname').textContent=CONFIG.TREE_NAME;
   buildIvForm('iv-form');renderProviders();
-  // Load cache immediately for instant render
-  if(loadCache()){inferSiblings(true);refresh();}
-  // Then sync from Supabase
+  if(loadCache()){normalizeRels(true);refresh();}
   await loadAll();
   $('db-status').textContent=STATE.demo?'Demo mode — data is local to this browser.':'✓ Connected to Supabase.';
 }
 
-// ── Supabase REST ──
 async function sb(method,table,body,q=''){
   if(STATE.demo)return demoSB(method,table,body,q);
   const r=await fetch(`${CONFIG.SB_URL}/rest/v1/${table}${q}`,{method,
@@ -480,22 +438,17 @@ async function loadAll(){
       sbGet('invites','?select=*&order=created_at.desc'),
       sbGet('interviews','?select=*&status=eq.pending&order=created_at.desc'),
     ]);
-    // Only replace state if server has data (don't wipe cache if server returns empty)
     if(people.length>0||Object.keys(STATE.people).length===0){
       STATE.people={};people.forEach(p=>STATE.people[p.id]=p);
       STATE.rels=rels;STATE.invites=invites;
     }
     STATE.pending=pending;
-    inferSiblings(true);// infer then persist any new sibling edges
-    saveCache();
-    hideSyncBanner();
-    refresh();
+    normalizeRels(true);
+    saveCache();hideSyncBanner();refresh();
   }catch(e){
     console.error('loadAll error:',e.message);
     if($('db-status'))$('db-status').textContent='⚠ '+e.message+' (showing cached data)';
-    showSyncBanner();
-    // Keep existing state, still refresh UI
-    refresh();
+    showSyncBanner();refresh();
   }
 }
 
@@ -503,8 +456,7 @@ function refresh(){
   setEl('h-p',Object.keys(STATE.people).length);setEl('h-r',STATE.rels.length);
   $('resp-dot').textContent=STATE.pending.length?`(${STATE.pending.length})`:'';
   renderSide();buildTree();renderInvites();renderResponses();renderInsights();fillSelects();
-  // Keep profile panel open and up-to-date after refresh
-  if(editingId&&STATE.people[editingId]) renderProfile(editingId,editMode);
+  if(editingId&&STATE.people[editingId])renderProfile(editingId,editMode);
 }
 function nav(name,btn){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
@@ -512,7 +464,6 @@ function nav(name,btn){
   $('p-'+name).classList.add('on');btn.classList.add('on');
 }
 
-// ── sidebar ──
 function renderSide(f=''){
   const all=Object.values(STATE.people);
   const list=f?all.filter(p=>(p.full_name||'').toLowerCase().includes(f.toLowerCase())):all;
@@ -523,37 +474,44 @@ function renderSide(f=''){
 }
 function filterSide(v){renderSide(v);}
 
-// ════════════════════════════════════════════════════════
-//  SIBLING INFERENCE — auto-link children of same parent
-// ════════════════════════════════════════════════════════
-function inferSiblings(silent=false){
-  // Build parent→children map from PARENT_OF edges
-  const kids={};
-  STATE.rels.forEach(r=>{
-    if((r.type||'').toUpperCase().includes('PARENT')&&r.from_id&&r.to_id){
-      (kids[r.from_id]=kids[r.from_id]||[]).push(r.to_id);
-    }
-  });
-  const toAdd=[];
-  Object.values(kids).forEach(ch=>{
-    for(let i=0;i<ch.length;i++)for(let j=i+1;j<ch.length;j++){
-      const[a,b]=[ch[i],ch[j]];
-      if(!STATE.people[a]||!STATE.people[b])continue;
-      const already=STATE.rels.some(r=>((r.from_id===a&&r.to_id===b)||(r.from_id===b&&r.to_id===a))&&(r.type||'').toUpperCase().includes('SIBLING'));
-      if(!already){
-        const edge={id:crypto.randomUUID(),from_id:a,to_id:b,type:'SIBLING_OF',label:'sibling of',confidence:1};
-        STATE.rels.push(edge);toAdd.push(edge);
-      }
-    }
-  });
-  if(!silent&&!STATE.demo&&toAdd.length)
-    toAdd.forEach(e=>sbPost('relationships',e).catch(()=>{}));
-  return toAdd.length;
+function relType(r){return(r.type||'').toUpperCase();}
+function isType(r,kw){return relType(r).includes(kw);}
+function relExists(f,t,type){
+  const sym=type.includes('SPOUSE')||type.includes('SIBLING');
+  return STATE.rels.some(r=>((r.from_id===f&&r.to_id===t)||(sym&&r.from_id===t&&r.to_id===f))&&relType(r)===type);
+}
+function pushRel(f,t,type,label){
+  if(!f||!t||f===t)return null;
+  if(relExists(f,t,type))return null;
+  const e={id:crypto.randomUUID(),from_id:f,to_id:t,type,label:label||type.toLowerCase().replace('_',' '),confidence:1};
+  STATE.rels.push(e);return e;
 }
 
-// ════════════════════════════════════════════════════════
-//  KINSHIP ENGINE  (English + Romanized Hindi labels)
-// ════════════════════════════════════════════════════════
+function normalizeRels(silent){
+  const added=[];
+  for(let iter=0;iter<3;iter++){
+    let changed=false;
+    const childrenByParent={};
+    STATE.rels.forEach(r=>{if(isType(r,'PARENT')&&r.from_id&&r.to_id){(childrenByParent[r.from_id]=childrenByParent[r.from_id]||new Set()).add(r.to_id);}});
+    Object.values(childrenByParent).forEach(set=>{
+      const ch=[...set].filter(id=>STATE.people[id]);
+      for(let i=0;i<ch.length;i++)for(let j=i+1;j<ch.length;j++){
+        const e=pushRel(ch[i],ch[j],'SIBLING_OF','sibling of');if(e){added.push(e);changed=true;}
+      }
+    });
+    const sibAdj={};
+    STATE.rels.forEach(r=>{if(isType(r,'SIBLING')){(sibAdj[r.from_id]=sibAdj[r.from_id]||new Set()).add(r.to_id);(sibAdj[r.to_id]=sibAdj[r.to_id]||new Set()).add(r.from_id);}});
+    Object.keys(sibAdj).forEach(a=>{
+      const group=[...sibAdj[a]].filter(id=>STATE.people[id]);
+      group.forEach(b=>{(sibAdj[b]||new Set()).forEach(c=>{if(c!==a&&STATE.people[c]){const e=pushRel(a,c,'SIBLING_OF','sibling of');if(e){added.push(e);changed=true;}}});});
+    });
+    if(!changed)break;
+  }
+  if(!silent&&!STATE.demo&&added.length)added.forEach(e=>sbPost('relationships',e).catch(()=>{showSyncBanner();}));
+  if(added.length)saveCache();
+  return added.length;
+}
+
 function rootId(){const r=Object.values(STATE.people).find(p=>norm(p.full_name)===norm(CONFIG.ROOT));return r?r.id:null;}
 function pathBetween(a,b){
   const adj={};STATE.rels.forEach(r=>{(adj[r.from_id]=adj[r.from_id]||[]).push(r.to_id);(adj[r.to_id]=adj[r.to_id]||[]).push(r.from_id);});
@@ -563,7 +521,7 @@ function pathBetween(a,b){
 }
 function stepBetween(a,b){
   for(const r of STATE.rels){
-    const t=(r.type||'').toUpperCase();
+    const t=relType(r);
     if(r.from_id===a&&r.to_id===b){if(t.includes('PARENT'))return'dn';if(t.includes('CHILD'))return'up';if(t.includes('SPOUSE'))return'sp';if(t.includes('SIBLING'))return'si';}
     if(r.from_id===b&&r.to_id===a){if(t.includes('PARENT'))return'up';if(t.includes('CHILD'))return'dn';if(t.includes('SPOUSE'))return'sp';if(t.includes('SIBLING'))return'si';}
   }return'?';
@@ -582,14 +540,16 @@ const KIN={
   'up,si,sp':g=>g==='female'?'Aunt (Chachi/Mami)':'Uncle (Fufa/Mausa)',
   'si,dn':g=>g==='female'?'Niece (Bhatiji)':'Nephew (Bhatija)',
   'si,dn,dn':()=>'Grand-Niece/Nephew',
-  'up,si,dn':g=>g==='female'?'Cousin Sister':'Cousin Brother',
+  'up,si,dn':g=>g==='female'?'Cousin Sister (Behan)':'Cousin Brother (Bhai)',
   'up,up,si':g=>g==='female'?'Grand-Aunt':'Grand-Uncle',
+  'up,up,si,dn':g=>g==='female'?'Cousin Aunt':'Cousin Uncle',
+  'up,up,si,dn,dn':g=>g==='female'?'Cousin (Behan)':'Cousin (Bhai)',
   'sp,up':g=>g==='female'?'Mother-in-law (Sasu Maa)':'Father-in-law (Sasur)',
   'sp,si':g=>g==='female'?'Sister-in-law (Nanad/Sali)':'Brother-in-law (Saala/Devar)',
   'dn,sp':g=>g==='female'?'Daughter-in-law (Bahu)':'Son-in-law (Damaad)',
+  'sp,dn':g=>g==='female'?'Daughter-in-law (Bahu)':'Son-in-law (Damaad)',
   'si,sp':g=>g==='female'?'Sister-in-law (Bhabhi)':'Brother-in-law (Jija/Behnoi)',
   'up,dn':g=>g==='female'?'Sister (Behan)':'Brother (Bhai)',
-  'sp,dn':g=>g==='female'?'Daughter-in-law (Bahu)':'Son-in-law (Damaad)',
 };
 function kinship(root,id){
   if(!root||!id)return'';if(root===id)return'You';
@@ -598,70 +558,57 @@ function kinship(root,id){
   if(steps.includes('?'))return'Relative';
   const key=steps.join(',');const g=(STATE.people[id]?.gender||'unknown').toLowerCase();
   const fn=KIN[key];if(fn)return fn(g);
-  if(steps.length<=2)return'Relative';return'Distant Relative';
+  return steps.length<=2?'Relative':'Distant Relative';
 }
 
-// ════════════════════════════════════════════════════════
-//  TREE LAYOUT  — hierarchical, generation-aware, spouse-aware
-// ════════════════════════════════════════════════════════
 function computeGens(people,idset){
   const par={},chi={},sib={},spo={};
   people.forEach(p=>{par[p.id]=[];chi[p.id]=[];sib[p.id]=[];spo[p.id]=[];});
   STATE.rels.forEach(r=>{
     if(!idset.has(r.from_id)||!idset.has(r.to_id))return;
-    const t=(r.type||'').toUpperCase();
+    const t=relType(r);
     if(t.includes('PARENT')){chi[r.from_id].push(r.to_id);par[r.to_id].push(r.from_id);}
     else if(t.includes('CHILD')){chi[r.to_id].push(r.from_id);par[r.from_id].push(r.to_id);}
     else if(t.includes('SPOUSE')){spo[r.from_id].push(r.to_id);spo[r.to_id].push(r.from_id);}
     else if(t.includes('SIBLING')){sib[r.from_id].push(r.to_id);sib[r.to_id].push(r.from_id);}
   });
-  const gen={};
-  const root=rootId();
+  const gen={};const root=rootId();
   const seeds=root?[root,...people.map(p=>p.id)]:people.map(p=>p.id);
   seeds.forEach(s=>{
-    if(gen[s]!=null)return;gen[s]=0;
-    const q=[s];
+    if(gen[s]!=null)return;gen[s]=0;const q=[s];
     while(q.length){
       const u=q.shift();
       par[u].forEach(p=>{if(gen[p]==null){gen[p]=gen[u]+1;q.push(p);}});
       chi[u].forEach(c=>{if(gen[c]==null){gen[c]=gen[u]-1;q.push(c);}});
-      spo[u].forEach(sp=>{if(gen[sp]==null){gen[sp]=gen[u];q.push(sp);}});
-      sib[u].forEach(si=>{if(gen[si]==null){gen[si]=gen[u];q.push(si);}});
+      spo[u].forEach(s2=>{if(gen[s2]==null){gen[s2]=gen[u];q.push(s2);}});
+      sib[u].forEach(s2=>{if(gen[s2]==null){gen[s2]=gen[u];q.push(s2);}});
     }
   });
   people.forEach(p=>{if(gen[p.id]==null)gen[p.id]=0;});
-  return{gen,par,chi,spo};
+  return{gen,par,chi,spo,sib};
 }
 
 function layout(){
   const people=Object.values(STATE.people);if(!people.length)return null;
   const idset=new Set(people.map(p=>p.id));
-  const{gen,par,chi,spo}=computeGens(people,idset);
-  // Normalize gen so oldest generation = highest Y (top)
-  const allG=Object.values(gen),minG=Math.min(...allG);
-  people.forEach(p=>gen[p.id]-=minG);
-  const maxG=Math.max(...Object.values(gen));
-  // Flip: gen 0 (oldest) at top, maxG at bottom
-  people.forEach(p=>gen[p.id]=maxG-gen[p.id]);
-  // Group by generation row
+  const{gen,par,chi,spo,sib}=computeGens(people,idset);
+  const minG=Math.min(...Object.values(gen));people.forEach(p=>gen[p.id]-=minG);
+  const maxG=Math.max(...Object.values(gen));people.forEach(p=>gen[p.id]=maxG-gen[p.id]);
   const rows={};people.forEach(p=>{(rows[gen[p.id]]=rows[gen[p.id]]||[]).push(p.id);});
   const levels=Object.keys(rows).map(Number).sort((a,b)=>a-b);
-  // Initial order by parent positions
   const order={};levels.forEach(l=>rows[l].forEach((id,i)=>order[id]=i));
-  // Sort passes
-  for(let pass=0;pass<10;pass++){
+  for(let pass=0;pass<12;pass++){
     levels.forEach(l=>{
       const arr=rows[l];
       const scored=arr.map(id=>{
         const ps=par[id].map(p=>order[p]).filter(v=>v!=null);
         const cs=chi[id].map(c=>order[c]).filter(v=>v!=null);
         const sp=spo[id].map(s=>order[s]).filter(v=>v!=null&&gen[s]===l);
-        const nb=[...ps,...cs,...sp];
+        const sb2=sib[id]?sib[id].map(s=>order[s]).filter(v=>v!=null&&gen[s]===l):[];
+        const nb=[...ps,...cs,...sp,...sb2];
         return{id,sc:nb.length?avg(nb):order[id]};
       });
       scored.sort((a,b)=>a.sc-b.sc||(order[a.id]-order[b.id]));
-      scored.forEach((s,i)=>order[s.id]=i);
-      // Keep spouses adjacent
       const out=[],done=new Set();
       scored.forEach(({id})=>{
         if(done.has(id))return;out.push(id);done.add(id);
@@ -672,14 +619,12 @@ function layout(){
   }
   const CW=128,CH=116,GX=28,GY=72,STEP=CW+GX;
   const x={};levels.forEach(l=>rows[l].forEach((id,i)=>x[id]=i*STEP));
-  // Center children under parents, parents over children
   const resolve=l=>{const a=[...rows[l]].sort((p,q)=>x[p]-x[q]);for(let i=1;i<a.length;i++){if(x[a[i]]<x[a[i-1]]+STEP)x[a[i]]=x[a[i-1]]+STEP;}};
-  for(let r=0;r<8;r++){
+  for(let r=0;r<10;r++){
     levels.forEach(l=>{rows[l].forEach(id=>{const ps=par[id].filter(p=>idset.has(p));if(ps.length)x[id]=avg(ps.map(p=>x[p]));});resolve(l);});
     [...levels].reverse().forEach(l=>{rows[l].forEach(id=>{const cs=chi[id].filter(c=>idset.has(c));if(cs.length)x[id]=avg(cs.map(c=>x[c]));});resolve(l);});
     levels.forEach(l=>{rows[l].forEach(id=>{const ss=spo[id].filter(s=>gen[s]===l&&idset.has(s));if(ss.length){const m=avg([id,...ss].map(s=>x[s]));x[id]=m;ss.forEach(s=>x[s]=m);}});resolve(l);});
   }
-  // Build output
   const pos={};let minX=Infinity,maxX=-Infinity,maxY=0;
   people.forEach(p=>{const px=x[p.id]||0,py=gen[p.id]*(CH+GY);pos[p.id]={x:px,y:py};minX=Math.min(minX,px);maxX=Math.max(maxX,px+CW);maxY=Math.max(maxY,py+CH);});
   people.forEach(p=>pos[p.id].x-=minX);
@@ -693,12 +638,12 @@ function buildTree(){
   if(!people.length){
     cv.style.width='100%';cv.style.height='100%';
     const d=document.createElement('div');d.style.cssText='position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--tx3);gap:.5rem';
-    d.innerHTML='<div style="font-size:38px;opacity:.22">🌳</div><div style="font-size:13px">No people yet — use "Add person" to start</div>';
+    d.innerHTML='<div style="font-size:38px;opacity:.22">🌳</div><div style="font-size:13px">No people yet — use "Add person" or "Load my starter family"</div>';
     cv.appendChild(d);applyT();return;
   }
   let L;try{L=layout();}catch(e){console.error('Layout error:',e);applyT();return;}
   if(!L){applyT();return;}
-  const{pos,par,chi,spo,CW,CH,GY,W,H}=L;
+  const{pos,par,chi,spo,CW,CH,W,H}=L;
   const PAD=80;
   cv.style.width=(W+PAD*2)+'px';cv.style.height=(H+PAD*2)+'px';
   svg.setAttribute('width',W+PAD*2);svg.setAttribute('height',H+PAD*2);
@@ -709,18 +654,12 @@ function buildTree(){
   const mid_y=id=>pos[id]?pos[id].y+oy+CH/2:0;
   const NS='http://www.w3.org/2000/svg';
   const mk=(tag,attrs)=>{const e=document.createElementNS(NS,tag);Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));svg.appendChild(e);return e;};
-
-  // Spouse connectors (dashed line between couple)
   const seenSp=new Set();
-  people.forEach(p=>{
-    (spo[p.id]||[]).forEach(s=>{
-      if(!pos[s])return;const k=[p.id,s].sort().join('|');if(seenSp.has(k))return;seenSp.add(k);
-      const lft=pos[p.id].x<=pos[s].x?p.id:s,rgt=pos[p.id].x<=pos[s].x?s:p.id;
-      mk('line',{x1:pos[lft].x+ox+CW,y1:mid_y(lft),x2:pos[rgt].x+ox,y2:mid_y(rgt),stroke:'var(--lns)','stroke-width':1.5,'stroke-dasharray':'4 3'});
-    });
-  });
-
-  // Parent-child connectors (grouped by shared parent set)
+  people.forEach(p=>{(spo[p.id]||[]).forEach(s=>{
+    if(!pos[s])return;const k=[p.id,s].sort().join('|');if(seenSp.has(k))return;seenSp.add(k);
+    const lft=pos[p.id].x<=pos[s].x?p.id:s,rgt=pos[p.id].x<=pos[s].x?s:p.id;
+    mk('line',{x1:pos[lft].x+ox+CW,y1:mid_y(lft),x2:pos[rgt].x+ox,y2:mid_y(rgt),stroke:'var(--lns)','stroke-width':1.5,'stroke-dasharray':'4 3'});
+  });});
   const groups={};
   people.forEach(c=>{
     const ps=(par[c.id]||[]).filter(id=>pos[id]);if(!ps.length)return;
@@ -736,13 +675,10 @@ function buildTree(){
     mk('line',{x1:lo,y1:barY,x2:hi,y2:barY,stroke:'var(--ln)','stroke-width':1.5});
     kids.forEach(id=>mk('line',{x1:cx(id),y1:barY,x2:cx(id),y2:top_y(id),stroke:'var(--ln)','stroke-width':1.5}));
   });
-
-  // Person cards
   const rid=rootId();
   people.forEach(p=>{
     if(!pos[p.id])return;
-    const g=(p.gender||'').toLowerCase();
-    const col=gc(p);
+    const g=(p.gender||'').toLowerCase();const col=gc(p);
     const gi=g==='male'?'♂':g==='female'?'♀':'';
     const gc2=g==='male'?'var(--ml)':g==='female'?'var(--fm)':'var(--nt)';
     const lab=rid?kinship(rid,p.id):'';
@@ -760,10 +696,10 @@ function buildTree(){
 }
 
 function setupPanZoom(){
-  const vp=$('tv');vp.onwheel=null;vp.onmousedown=null;vp.onmousemove=null;vp.onmouseup=null;vp.onmouseleave=null;
+  const vp=$('tv');
   vp.onwheel=e=>{e.preventDefault();const d=e.deltaY<0?1.12:.89;const r=vp.getBoundingClientRect();const mx=e.clientX-r.left,my=e.clientY-r.top;tX=(tX-mx)*d+mx;tY=(tY-my)*d+my;tZ=Math.max(.12,Math.min(tZ*d,3));applyT();};
-  vp.onmousedown=e=>{if(e.target.closest('.pc'))return;dragging=true;dStart=false;dsx=e.clientX-tX;dsy=e.clientY-tY;};
-  vp.onmousemove=e=>{if(!dragging)return;tX=e.clientX-dsx;tY=e.clientY-dsy;dStart=true;applyT();};
+  vp.onmousedown=e=>{if(e.target.closest('.pc'))return;dragging=true;dsx=e.clientX-tX;dsy=e.clientY-tY;};
+  vp.onmousemove=e=>{if(!dragging)return;tX=e.clientX-dsx;tY=e.clientY-dsy;applyT();};
   vp.onmouseup=()=>{dragging=false;};vp.onmouseleave=()=>{dragging=false;};
 }
 function applyT(){$('tc').style.transform=`translate(${tX}px,${tY}px) scale(${tZ})`;}
@@ -778,14 +714,11 @@ function fitTree(){
 function zIn(){tZ=Math.min(tZ*1.3,3);applyT();}
 function zOut(){tZ=Math.max(tZ*.77,.12);applyT();}
 
-// ════════════════════════════════════════════════════════
-//  PROFILE — view + instant edit (no reload on error)
-// ════════════════════════════════════════════════════════
 function openProfile(id){editingId=id;editMode=false;renderProfile(id,false);}
-function closeProfile(){$('ppa').classList.remove('open');editingId=null;editMode=false;}
+function closeProfile(){$('ppa').classList.remove('open');editingId=null;editMode=false;refresh();}
 
 function relKind(r,me){
-  const t=(r.type||'').toUpperCase();const f=r.from_id===me;
+  const t=relType(r);const f=r.from_id===me;
   if(t.includes('SPOUSE'))return'spouse';if(t.includes('SIBLING'))return'sibling';
   if(t.includes('PARENT'))return f?'parent':'child';if(t.includes('CHILD'))return f?'child':'parent';
   return'parent';
@@ -796,13 +729,8 @@ function kindEdge(kind,me,other){
   if(kind==='spouse')return{from_id:me,to_id:other,type:'SPOUSE_OF',label:'spouse of'};
   return{from_id:me,to_id:other,type:'SIBLING_OF',label:'sibling of'};
 }
-function dupRel(f,t,type){
-  const sym=type.includes('SPOUSE')||type.includes('SIBLING');
-  return STATE.rels.some(r=>((r.from_id===f&&r.to_id===t)||(sym&&r.from_id===t&&r.to_id===f))&&(r.type||'').toUpperCase()===type);
-}
 function relPhrase(r,me){
-  const f=r.from_id===me;const g=(STATE.people[me]?.gender||'unknown').toLowerCase();
-  const t=(r.type||'').toUpperCase();
+  const f=r.from_id===me;const g=(STATE.people[me]?.gender||'unknown').toLowerCase();const t=relType(r);
   if(t.includes('PARENT'))return f?(g==='female'?'mother of':'father of'):(g==='female'?'daughter of':'son of');
   if(t.includes('CHILD'))return f?(g==='female'?'daughter of':'son of'):(g==='female'?'mother of':'father of');
   if(t.includes('SPOUSE'))return g==='female'?'wife of':g==='male'?'husband of':'spouse of';
@@ -819,13 +747,12 @@ function renderProfile(id,edit){
   setEl('pp-n',p.full_name||'—');
   setEl('pp-s',[p.occupation,p.birth_place].filter(Boolean).join(' · ')||'');
   const rid=rootId();
-  setEl('pp-kin',rid&&rid!==id?kinship(rid,id):'');
+  setEl('pp-kin',rid&&rid!==id?kinship(rid,id):rid===id?'You (Root)':'');
   const my=STATE.rels.filter(r=>r.from_id===id||r.to_id===id);
   const b=$('pp-b');
   if(!edit){
     b.innerHTML=
       (p.birth_year?`<div class="ppr"><span class="ppk">Born</span><span class="ppv">${p.birth_year}${p.birth_place?' in '+esc(p.birth_place):''}</span></div>`:'')+
-      (p.current_location?`<div class="ppr"><span class="ppk">Lives</span><span class="ppv">${esc(p.current_location)}</span></div>`:'')+
       (p.gender&&p.gender!=='unknown'?`<div class="ppr"><span class="ppk">Gender</span><span class="ppv" style="text-transform:capitalize">${p.gender}</span></div>`:'')+
       (p.is_deceased?`<div class="ppr"><span class="ppv" style="color:var(--tx3)">Deceased</span></div>`:'')+
       (my.length?`<div style="margin-top:.5rem"><div class="qt">Relationships</div>${my.map(r=>{const oid=r.from_id===id?r.to_id:r.from_id;const op=STATE.people[oid];return`<span class="chip">${esc(relPhrase(r,id))} ${op?esc(op.full_name):'?'}</span>`;}).join('')}</div>`:`<div class="qt" style="margin-top:.5rem">No relationships yet</div>`)+
@@ -876,11 +803,8 @@ function renderProfile(id,edit){
 }
 function preConn(id){$('sel-a').value=id;nav('connect',document.querySelectorAll('.tab')[5]);}
 
-// ════════════════════════════════════════════════════════
-//  INSTANT EDITS — optimistic updates, no reload on fail
-// ════════════════════════════════════════════════════════
 async function saveFields(id){
-  const p=STATE.people[id];
+  const p=STATE.people[id];if(!p)return;
   const upd={
     full_name:val('ef-n')||p.full_name,
     birth_year:parseInt(val('ef-y'))||null,
@@ -889,86 +813,58 @@ async function saveFields(id){
     occupation:val('ef-oc')||null,
     is_deceased:$('ef-dc').checked
   };
-  // Optimistic: update local state immediately
   STATE.people[id]={...p,...upd};
   saveCache();fitted=true;refresh();ppSt('Saving…');
-  try{
-    await sbPatch('people',`?id=eq.${id}`,upd);
-    ppSt('Saved ✓','var(--gn)');hideSyncBanner();
-  }catch(e){
-    ppSt('⚠ Not saved to server: '+e.message.slice(0,45),'var(--rd)');
-    showSyncBanner();
-    // DO NOT reload — keep optimistic state
-  }
+  try{await sbPatch('people',`?id=eq.${id}`,upd);ppSt('Saved ✓','var(--gn)');hideSyncBanner();}
+  catch(e){ppSt('⚠ Saved on device, not server: '+e.message.slice(0,35),'var(--rd)');showSyncBanner();}
 }
-
 async function setRel(relId,me,other,kind){
-  const edge=kindEdge(kind,me,other);
-  const newId=crypto.randomUUID();
+  const edge=kindEdge(kind,me,other);const newId=crypto.randomUUID();
   STATE.rels=STATE.rels.filter(r=>r.id!==relId);
-  if(!dupRel(edge.from_id,edge.to_id,edge.type)) STATE.rels.push({id:newId,...edge});
-  inferSiblings(true);// infer new siblings silently first
+  if(!relExists(edge.from_id,edge.to_id,edge.type))STATE.rels.push({id:newId,...edge});
+  normalizeRels(true);
   saveCache();fitted=true;refresh();ppSt('Saving…');
   try{
     await sbDel('relationships',`?id=eq.${relId}`);
     await sbPost('relationships',{id:newId,...edge});
-    // Persist any inferred sibling edges
-    inferSiblings(false);
+    normalizeRels(false);
     ppSt('Updated ✓','var(--gn)');hideSyncBanner();
-  }catch(e){
-    ppSt('⚠ Not synced: '+e.message.slice(0,40),'var(--rd)');showSyncBanner();
-  }
+  }catch(e){ppSt('⚠ Not synced: '+e.message.slice(0,35),'var(--rd)');showSyncBanner();}
 }
-
 async function addRel(me){
   const other=$('ef-np')?.value,kind=$('ef-nk')?.value||'parent';
   if(!other)return;
   const edge=kindEdge(kind,me,other);
-  if(dupRel(edge.from_id,edge.to_id,edge.type)){ppSt('Already linked','var(--tx3)');return;}
-  const newId=crypto.randomUUID();
-  STATE.rels.push({id:newId,...edge});
-  inferSiblings(true);
+  if(relExists(edge.from_id,edge.to_id,edge.type)){ppSt('Already linked','var(--tx3)');return;}
+  const newId=crypto.randomUUID();STATE.rels.push({id:newId,...edge});
+  normalizeRels(true);
   saveCache();fitted=true;refresh();ppSt('Saving…');
-  try{
-    await sbPost('relationships',{id:newId,...edge});
-    inferSiblings(false);
-    ppSt('Linked ✓','var(--gn)');hideSyncBanner();
-  }catch(e){
-    ppSt('⚠ Not synced: '+e.message.slice(0,40),'var(--rd)');showSyncBanner();
-  }
+  try{await sbPost('relationships',{id:newId,...edge});normalizeRels(false);ppSt('Linked ✓','var(--gn)');hideSyncBanner();}
+  catch(e){ppSt('⚠ Not synced: '+e.message.slice(0,35),'var(--rd)');showSyncBanner();}
 }
-
 async function removeRel(relId,me){
   STATE.rels=STATE.rels.filter(r=>r.id!==relId);
   saveCache();fitted=true;refresh();ppSt('Saving…');
-  try{
-    await sbDel('relationships',`?id=eq.${relId}`);
-    ppSt('Removed ✓','var(--gn)');hideSyncBanner();
-  }catch(e){
-    ppSt('⚠ Not synced: '+e.message.slice(0,40),'var(--rd)');showSyncBanner();
-  }
+  try{await sbDel('relationships',`?id=eq.${relId}`);ppSt('Removed ✓','var(--gn)');hideSyncBanner();}
+  catch(e){ppSt('⚠ Not synced: '+e.message.slice(0,35),'var(--rd)');showSyncBanner();}
 }
-
 async function delPerson(id){
   if(!confirm('Delete this person and all their relationships?'))return;
   delete STATE.people[id];STATE.rels=STATE.rels.filter(r=>r.from_id!==id&&r.to_id!==id);
   closeProfile();saveCache();refresh();
-  try{await sbDel('people',`?id=eq.${id}`);}
-  catch(e){showSyncBanner();}
+  try{await sbDel('people',`?id=eq.${id}`);}catch(e){showSyncBanner();}
 }
-
 async function wipeAll(){
   if(!confirm('Delete ALL people and relationships? This cannot be undone.'))return;
-  STATE.people={};STATE.rels=[];fitted=false;closeProfile();saveCache();refresh();
+  STATE.people={};STATE.rels=[];fitted=false;closeProfile();
+  try{localStorage.removeItem('ft_v3');}catch(e){}
+  saveCache();refresh();
   try{
     if(STATE.demo){['ftd_people','ftd_relationships','ftd_invites','ftd_interviews'].forEach(k=>localStorage.setItem(k,'[]'));}
     else{await sbDel('relationships','?from_id=neq.00000000-0000-0000-0000-000000000000');await sbDel('people','?id=neq.00000000-0000-0000-0000-000000000000');}
   }catch(e){alert('Wipe error: '+e.message);}
 }
 
-// ════════════════════════════════════════════════════════
-//  AI — parsing interview answers into people + relationships
-// ════════════════════════════════════════════════════════
 const PROV={
   groq:{url:'https://api.groq.com/openai/v1/chat/completions',model:'llama-3.3-70b-versatile'},
   gemini:{url:'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',model:'gemini-2.0-flash'},
@@ -978,10 +874,9 @@ const PROV={
 };
 async function callAI(prompt){
   const pr=PROV[STATE.aiProvider];if(!pr)throw new Error('no-ai');const model=STATE.aiModel||pr.model;
-  if(pr.ant){const r=await fetch(pr.url,{method:'POST',headers:{'Content-Type':'application/json','x-api-key':STATE.aiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model,max_tokens:1200,temperature:0,messages:[{role:'user',content:prompt}]})});const d=await r.json();if(!r.ok)throw new Error(d.error?.message||r.status);return d.content[0]?.text||'';}
-  const r=await fetch(pr.url,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${STATE.aiKey}`},body:JSON.stringify({model,max_tokens:1200,temperature:0,messages:[{role:'user',content:prompt}]})});const d=await r.json();if(!r.ok)throw new Error(d.error?.message||r.status);return d.choices[0]?.message?.content||'';
+  if(pr.ant){const r=await fetch(pr.url,{method:'POST',headers:{'Content-Type':'application/json','x-api-key':STATE.aiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model,max_tokens:1500,temperature:0,messages:[{role:'user',content:prompt}]})});const d=await r.json();if(!r.ok)throw new Error(d.error?.message||r.status);return d.content[0]?.text||'';}
+  const r=await fetch(pr.url,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${STATE.aiKey}`},body:JSON.stringify({model,max_tokens:1500,temperature:0,messages:[{role:'user',content:prompt}]})});const d=await r.json();if(!r.ok)throw new Error(d.error?.message||r.status);return d.choices[0]?.message?.content||'';
 }
-
 function parsePrompt(name,rel,ans){
   const qa=QUESTIONS.map(([id,q])=>`${id.toUpperCase()} (${q}): ${ans[id]||'(none)'}`).join('\n');
   const existing=Object.values(STATE.people);
@@ -994,119 +889,163 @@ STRICT RULES:
 1. Only include people whose names are explicitly stated above. Never invent.
 2. Use ONLY these relationship types: PARENT_OF, SPOUSE_OF, SIBLING_OF. PARENT_OF means FROM=parent TO=child.
 3. Never use CHILD_OF or any other type.
-4. If someone matches an existing tree person (same or very similar name), use their exact existing name.
-5. Output raw JSON only — no fences, no explanation.
+4. If someone matches an existing tree person (same/similar name), use their exact existing name.
+5. For grandparents: they are PARENT_OF the subject's parent (two PARENT_OF hops). Do not link a grandparent directly to the subject.
+6. Output raw JSON only.
 
 EXISTING TREE PEOPLE (match names when possible):
 ${existList}
 
-Output this exact schema:
+Schema:
 {"respondent":{"fullName":"","gender":"male|female|unknown"},
 "persons":[{"id":"p1","fullName":"","gender":"male|female|unknown","confidence":0.9}],
-"relationships":[{"from":"respondent|p1|INTERVIEWER","to":"respondent|p1|INTERVIEWER","type":"PARENT_OF|SPOUSE_OF|SIBLING_OF","label":"father|mother|etc","confidence":0.9}],
+"relationships":[{"from":"respondent|p1|INTERVIEWER","to":"respondent|p1|INTERVIEWER","type":"PARENT_OF|SPOUSE_OF|SIBLING_OF","label":"father","confidence":0.9}],
 "insights":{"summary":""}}
-Note: INTERVIEWER = the tree owner who sent this form. Include the subject (respondent). Use IDs p1, p2, p3...`;
+INTERVIEWER = the tree owner who sent this form. Include the subject. Use IDs p1,p2,p3...`;
 }
-
 function ruleParse(name,rel,a){
-  const nm=t=>(t.match(/\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b/g)||[]).filter(x=>x.length>2&&!['Father','Mother','Brother','Sister','Spouse','Child','Born'].includes(x));
+  const STOP=['Father','Mother','Brother','Sister','Spouse','Child','Born','Grandfather','Grandmother','Son','Daughter','Wife','Husband','Uncle','Aunt'];
+  const nm=t=>(t.match(/\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b/g)||[]).filter(x=>x.length>2&&!STOP.includes(x));
   let i=1;const P=[],R=[];
-  const add=(n,x={})=>{const id='p'+i++;P.push({id,fullName:n,gender:'unknown',confidence:.7,...x});return id;};
+  const add=(n,x={})=>{const ex=P.find(p=>norm(p.fullName)===norm(n));if(ex)return ex.id;const id='p'+i++;P.push({id,fullName:n,gender:'unknown',confidence:.7,...x});return id;};
   const rId=add(name,{confidence:.95});
-  R.push({from:rId,to:'INTERVIEWER',type:'SIBLING_OF',label:rel||'relative',confidence:.4});
-  nm(a.parents||'').slice(0,2).forEach((n,j)=>{const id=add(n,{gender:j?'female':'male'});R.push({from:id,to:rId,type:'PARENT_OF',label:j?'mother':'father',confidence:.8});});
-  nm(a.siblings||'').forEach(n=>{const id=add(n);R.push({from:rId,to:id,type:'SIBLING_OF',label:'sibling',confidence:.7});});
+  if(rel)R.push({from:rId,to:'INTERVIEWER',type:'SIBLING_OF',label:rel,confidence:.4});
+  const parIds=[];
+  nm(a.parents||'').slice(0,2).forEach((n,j)=>{const id=add(n,{gender:j?'female':'male'});parIds.push(id);R.push({from:id,to:rId,type:'PARENT_OF',label:j?'mother':'father',confidence:.85});});
+  nm(a.siblings||'').forEach(n=>{const id=add(n);R.push({from:rId,to:id,type:'SIBLING_OF',label:'sibling',confidence:.8});parIds.forEach(pid=>R.push({from:pid,to:id,type:'PARENT_OF',label:'parent',confidence:.6}));});
   const sp=nm(a.spouse||'');if(sp[0]){const id=add(sp[0]);R.push({from:rId,to:id,type:'SPOUSE_OF',label:'spouse',confidence:.8});}
-  nm(a.children||'').forEach(n=>{const id=add(n);R.push({from:rId,to:id,type:'PARENT_OF',label:'child',confidence:.7});});
-  nm(a.extra||'').slice(0,4).forEach(n=>{if(!P.some(p=>p.fullName===n)){const id=add(n,{confidence:.5});R.push({from:id,to:rId,type:'SIBLING_OF',label:'relative',confidence:.4});}});
+  nm(a.children||'').forEach(n=>{const id=add(n);R.push({from:rId,to:id,type:'PARENT_OF',label:'child',confidence:.75});});
+  nm(a.grandparents||'').slice(0,4).forEach((n,j)=>{const id=add(n,{gender:j%2?'female':'male'});if(parIds[0])R.push({from:id,to:parIds[0],type:'PARENT_OF',label:j%2?'grandmother':'grandfather',confidence:.6});});
+  nm(a.extra||'').slice(0,5).forEach(n=>{add(n,{confidence:.5});});
   return{persons:P,relationships:R,insights:{summary:`Rule parse: ${P.length} people, ${R.length} links. Switch to Groq/Gemini (Settings) for better accuracy.`}};
 }
-
 async function doParse(name,rel,ans){
-  let parsed;
+  let parsed=null;
   if(STATE.aiProvider==='none'){parsed=ruleParse(name,rel,ans);}
   else{
     const raw=await callAI(parsePrompt(name,rel,ans));
     const clean=raw.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();
-    try{parsed=JSON.parse(clean);}catch(e){const m=raw.match(/\{[\s\S]+\}/);if(!m)throw new Error('AI returned invalid JSON');parsed=JSON.parse(m[0]);}
+    try{parsed=JSON.parse(clean);}catch(e){const m=raw.match(/\{[\s\S]+\}/);if(m){try{parsed=JSON.parse(m[0]);}catch(e2){}}}
   }
-  const persons=[...(parsed.persons||[])].filter(p=>p.fullName&&p.fullName.trim().length>1);
+  if(!parsed||typeof parsed!=='object')parsed=ruleParse(name,rel,ans);
+  const persons=[...(parsed.persons||[])].filter(p=>p&&p.fullName&&String(p.fullName).trim().length>1);
   if(parsed.respondent?.fullName&&!persons.some(p=>p.id==='respondent'))
     persons.unshift({id:'respondent',...parsed.respondent,confidence:.95});
-  persons.forEach(p=>{
-    const ex=Object.values(STATE.people).find(e=>norm(e.full_name)===norm(p.fullName)&&norm(p.fullName).length>2);
-    p._status=ex?'merge':'new';p._existing=ex?ex.id:null;
-  });
+  persons.forEach(p=>{const ex=Object.values(STATE.people).find(e=>norm(e.full_name)===norm(p.fullName)&&norm(p.fullName).length>2);p._status=ex?'merge':'new';p._existing=ex?ex.id:null;});
   return{persons,relationships:parsed.relationships||[],insights:parsed.insights||{},name};
 }
-
 function reviewHTML(res){
   return`<div class="slbl" style="margin:.9rem 0 0">${res.persons.length} people · ${res.persons.filter(p=>p._status==='new').length} new · ${res.persons.filter(p=>p._status==='merge').length} already in tree</div>
   <div class="rg">${res.persons.map(p=>`<div class="rc ${p._status}"><div class="rct"><div class="rcn">${esc(p.fullName)}</div><span class="rtg ${p._status}">${p._status==='merge'?'matched':'new'}</span></div>${p.gender&&p.gender!=='unknown'?`<div class="rcd" style="text-transform:capitalize">${p.gender}</div>`:''}</div>`).join('')}</div>
   ${res.insights?.summary?`<div class="smry"><b>Summary</b>${esc(res.insights.summary)}</div>`:''}`;
 }
-
 async function saveTree(res){
+  if(!res||!res.persons)throw new Error('nothing to save');
   const interId=rootId();const idMap={};
   for(const p of res.persons){
     if(p._status==='merge'){idMap[p.id]=p._existing;continue;}
-    const rows=await sbPost('people',{full_name:p.fullName,gender:p.gender||'unknown',birth_year:p.birthYear||null,birth_place:p.birthPlace||null,occupation:p.occupation||null,is_deceased:!!p.isDeceased,source:'interview',added_by:res.name,confidence:p.confidence||0.9});
-    idMap[p.id]=rows[0].id;STATE.people[rows[0].id]=rows[0];
+    let row;
+    if(STATE.demo){row={id:crypto.randomUUID(),full_name:p.fullName,gender:p.gender||'unknown',birth_year:p.birthYear||null,is_deceased:!!p.isDeceased};STATE.people[row.id]=row;}
+    else{const rows=await sbPost('people',{full_name:p.fullName,gender:p.gender||'unknown',birth_year:p.birthYear||null,birth_place:p.birthPlace||null,occupation:p.occupation||null,is_deceased:!!p.isDeceased,source:'interview',added_by:res.name,confidence:p.confidence||0.9});row=rows[0];STATE.people[row.id]=row;}
+    idMap[p.id]=row.id;
   }
   for(const r of res.relationships){
     let type=(r.type||'').toUpperCase();
     let f=r.from==='INTERVIEWER'?interId:idMap[r.from];
     let t=r.to==='INTERVIEWER'?interId:idMap[r.to];
     if(!type||type.includes('CHILD')){[f,t]=[t,f];type='PARENT_OF';}
+    if(!type.includes('PARENT')&&!type.includes('SPOUSE')&&!type.includes('SIBLING'))continue;
     if(!f||!t||f===t)continue;
-    if(dupRel(f,t,type))continue;
-    const rows=await sbPost('relationships',{from_id:f,to_id:t,type,label:r.label,confidence:r.confidence||0.9});
-    STATE.rels.push(rows[0]);
+    if(relExists(f,t,type))continue;
+    const e={id:crypto.randomUUID(),from_id:f,to_id:t,type,label:r.label||'',confidence:r.confidence||0.9};
+    STATE.rels.push(e);
+    if(!STATE.demo)sbPost('relationships',e).catch(()=>{showSyncBanner();});
   }
-  // Auto-infer siblings from shared parents
-  inferSiblings(false);
-  saveCache();
+  normalizeRels(false);saveCache();
 }
 
-// ── Add person form ──
 function buildIvForm(cid){
-  $(cid).innerHTML=`<div class="card"><div class="ch"><div class="ct">Who is this about?</div><div class="badge">Required</div></div><div class="cb"><div class="r2"><div><div class="qt">Their full name</div><input class="in" id="iv-name" placeholder="e.g. Ramesh Kumar Tiwari"></div><div><div class="qt">Their relation to you (or 'self')</div><input class="in" id="iv-rel" placeholder="e.g. Paternal uncle"></div></div></div></div>`+
+  $(cid).innerHTML=`<div class="card"><div class="ch"><div class="ct">Who is this about?</div><div class="badge">Required</div></div><div class="cb"><div class="r2"><div><div class="qt">Their full name</div><input class="in" id="iv-name" placeholder="e.g. Satyam Tiwari"></div><div><div class="qt">Their relation to you (or 'self')</div><input class="in" id="iv-rel" placeholder="e.g. self / cousin"></div></div></div></div>`+
   QUESTIONS.map(([id,q,ph])=>`<div class="card"><div class="cb"><div class="qt">${q}</div><textarea class="in fq" data-q="${id}" placeholder="${ph}"></textarea></div></div>`).join('');
 }
 function collectIv(cid){const o={};document.querySelectorAll(`#${cid} .fq`).forEach(t=>o[t.dataset.q]=t.value.trim());return o;}
-
 async function ownerParse(){
   const name=val('iv-name'),rel=val('iv-rel');
   if(!name)return noteEl('iv-nt','err','Enter a name first.');
   const ans=collectIv('iv-form');
-  if(!Object.values(ans).some(a=>a.length>2))return noteEl('iv-nt','err','Fill in at least one field (parents, siblings, etc.).');
+  if(!Object.values(ans).some(a=>a.length>1))return noteEl('iv-nt','err','Fill in at least one field (parents, siblings, etc.).');
   if(STATE.aiProvider!=='none'&&!STATE.aiKey)return noteEl('iv-nt','err','Add an API key in Settings, or choose "No AI · rules".');
   btnEl('parse-btn',true,'Working…');noteEl('iv-nt','inf','Parsing answers…');
-  try{
-    parseResult=await doParse(name,rel,ans);
-    $('iv-nt').classList.remove('on');
-    $('iv-res').innerHTML=reviewHTML(parseResult)+`<div class="brow" style="margin-top:.8rem"><button class="btn btn-a" id="iv-save" onclick="ivSave()">Confirm & add to tree</button><button class="btn btn-s" onclick="$('iv-res').innerHTML='';parseResult=null">Discard</button></div>`;
-  }catch(e){noteEl('iv-nt','err','Error: '+e.message);}
+  let res=null;
+  try{res=await doParse(name,rel,ans);}
+  catch(e){noteEl('iv-nt','err','Error: '+e.message);btnEl('parse-btn',false,'Add to tree →');return;}
+  parseResult=res;
+  $('iv-nt').classList.remove('on');
+  $('iv-res').innerHTML=reviewHTML(res)+`<div class="brow" style="margin-top:.8rem"><button class="btn btn-a" id="iv-save" onclick="ivSave()">Confirm & add to tree</button><button class="btn btn-s" onclick="$('iv-res').innerHTML='';parseResult=null">Discard</button></div>`;
+  $('iv-res').dataset.has='1';
   btnEl('parse-btn',false,'Add to tree →');
 }
 async function ivSave(){
-  if(!parseResult)return;btnEl('iv-save',true,'Saving…');
+  const res=parseResult;
+  if(!res||!res.persons){noteEl('iv-nt','err','Nothing to add — parse again.');return;}
+  btnEl('iv-save',true,'Saving…');
   try{
-    await saveTree(parseResult);fitted=false;refresh();
+    await saveTree(res);fitted=false;refresh();
     $('iv-res').innerHTML='';clearIv();
-    noteEl('iv-nt','ok',`${parseResult.persons.filter(p=>p._status==='new').length} people added to tree.`);
+    noteEl('iv-nt','ok',`${res.persons.filter(p=>p._status==='new').length} people added to tree.`);
     parseResult=null;
   }catch(e){noteEl('iv-nt','err','Save failed: '+e.message);btnEl('iv-save',false,'Confirm & add to tree');}
 }
 function fillDemo(){
-  $('iv-name').value='Ramesh Tiwari';$('iv-rel').value='Paternal uncle';
-  const v={parents:'Father: Shivram Tiwari, Mother: Savitri Devi',siblings:'Suresh Tiwari, Mahesh Tiwari',spouse:'Sunita Devi',children:'Ankit Tiwari',extra:'Grandfather: Harishankar Tiwari'};
+  $('iv-name').value='Satyam Tiwari';$('iv-rel').value='self';
+  const v={parents:'Father: Bambeshwari Tiwari, Mother: Seema Tiwari',siblings:'Shivam Tiwari, Shubham Tiwari',spouse:'',children:'',grandparents:'Phoolchandra Tiwari, Girjavati Devi',extra:''};
   document.querySelectorAll('#iv-form .fq').forEach(t=>t.value=v[t.dataset.q]||'');
   noteEl('iv-nt','inf','Demo answers loaded — click Add to tree.');
 }
 function clearIv(){$('iv-name').value='';$('iv-rel').value='';document.querySelectorAll('#iv-form .fq').forEach(t=>t.value='');$('iv-res').innerHTML='';$('iv-nt').classList.remove('on');parseResult=null;}
 
-// ── Responses ──
+async function seedMyFamily(){
+  if(Object.keys(STATE.people).length && !confirm('This adds the starter family to your current tree. Continue?'))return;
+  noteEl('iv-nt','inf','Building your family…');
+  const def=[
+    ['phool','Phoolchandra Tiwari','male'],['girja','Girjavati Devi','female'],
+    ['bamb','Bambeshwari Tiwari','male'],['seema','Seema Tiwari','female'],
+    ['satyam','Satyam Tiwari','male'],['shivam','Shivam Tiwari','male'],['shubham','Shubham Tiwari','male'],
+    ['rajesh','Rajesh Tiwari','male'],['antima','Antima Tiwari','female'],
+    ['suryam','Suryam Tiwari','male'],['akanksha','Akanksha Tiwari','female'],['diksha','Diksha Tiwari','female'],
+  ];
+  const id={};
+  for(const [k,name,g] of def){
+    const ex=Object.values(STATE.people).find(p=>norm(p.full_name)===norm(name));
+    if(ex){id[k]=ex.id;continue;}
+    if(STATE.demo){const row={id:crypto.randomUUID(),full_name:name,gender:g};STATE.people[row.id]=row;id[k]=row.id;}
+    else{try{const rows=await sbPost('people',{full_name:name,gender:g,source:'seed'});STATE.people[rows[0].id]=rows[0];id[k]=rows[0].id;}catch(e){const row={id:crypto.randomUUID(),full_name:name,gender:g};STATE.people[row.id]=row;id[k]=row.id;showSyncBanner();}}
+  }
+  const E=[
+    [id.phool,id.bamb,'PARENT_OF'],[id.girja,id.bamb,'PARENT_OF'],
+    [id.phool,id.rajesh,'PARENT_OF'],[id.girja,id.rajesh,'PARENT_OF'],
+    [id.phool,id.girja,'SPOUSE_OF'],
+    [id.bamb,id.satyam,'PARENT_OF'],[id.seema,id.satyam,'PARENT_OF'],
+    [id.bamb,id.shivam,'PARENT_OF'],[id.seema,id.shivam,'PARENT_OF'],
+    [id.bamb,id.shubham,'PARENT_OF'],[id.seema,id.shubham,'PARENT_OF'],
+    [id.bamb,id.seema,'SPOUSE_OF'],
+    [id.rajesh,id.antima,'SPOUSE_OF'],
+    [id.rajesh,id.suryam,'PARENT_OF'],[id.antima,id.suryam,'PARENT_OF'],
+    [id.rajesh,id.akanksha,'PARENT_OF'],[id.antima,id.akanksha,'PARENT_OF'],
+    [id.rajesh,id.diksha,'PARENT_OF'],[id.antima,id.diksha,'PARENT_OF'],
+  ];
+  for(const [f,t,type] of E){
+    if(!f||!t||relExists(f,t,type))continue;
+    const e={id:crypto.randomUUID(),from_id:f,to_id:t,type,label:'',confidence:1};
+    STATE.rels.push(e);
+    if(!STATE.demo)sbPost('relationships',e).catch(()=>{showSyncBanner();});
+  }
+  normalizeRels(false);
+  fitted=false;saveCache();refresh();
+  noteEl('iv-nt','ok','Family loaded — open the Tree tab. Siblings, uncle, and cousins are all linked.');
+  nav('tree',document.querySelectorAll('.tab')[0]);
+}
+
 function renderResponses(){
   const el=$('resp-list');
   if(!STATE.pending.length){el.innerHTML='<div class="empty"><div class="ei">📭</div><div class="et">No pending responses</div><div class="es">Share an invite link — submissions appear here.</div></div>';return;}
@@ -1116,16 +1055,19 @@ async function processResp(id){
   const s=STATE.pending.find(x=>x.id===id);if(!s)return;
   if(STATE.aiProvider!=='none'&&!STATE.aiKey){nav('settings',document.querySelectorAll('.tab')[6]);return noteEl('resp-nt','err','Add an API key in Settings first.');}
   noteEl('resp-nt','inf','Parsing response…');
-  try{
-    parseResult=await doParse(s.respondent_name||'Someone',s.relation_to_owner||'',s.raw_answers||{});
-    $('resp-nt').classList.remove('on');
-    $('resp-res').innerHTML=reviewHTML(parseResult)+`<div class="brow" style="margin-top:.8rem"><button class="btn btn-a" id="resp-save" onclick="respSave('${id}')">Confirm & add</button><button class="btn btn-s" onclick="$('resp-res').innerHTML='';parseResult=null">Cancel</button></div>`;
-  }catch(e){noteEl('resp-nt','err','Error: '+e.message);}
+  let res=null;
+  try{res=await doParse(s.respondent_name||'Someone',s.relation_to_owner||'',s.raw_answers||{});}
+  catch(e){noteEl('resp-nt','err','Error: '+e.message);return;}
+  parseResult=res;
+  $('resp-nt').classList.remove('on');
+  $('resp-res').innerHTML=reviewHTML(res)+`<div class="brow" style="margin-top:.8rem"><button class="btn btn-a" id="resp-save" onclick="respSave('${id}')">Confirm & add</button><button class="btn btn-s" onclick="$('resp-res').innerHTML='';parseResult=null">Cancel</button></div>`;
 }
 async function respSave(id){
-  if(!parseResult)return;btnEl('resp-save',true,'Saving…');
+  const res=parseResult;
+  if(!res||!res.persons){noteEl('resp-nt','err','Nothing to add.');return;}
+  btnEl('resp-save',true,'Saving…');
   try{
-    await saveTree(parseResult);
+    await saveTree(res);
     await sbPatch('interviews',`?id=eq.${id}`,{status:'processed'});
     STATE.pending=STATE.pending.filter(x=>x.id!==id);
     fitted=false;refresh();$('resp-res').innerHTML='';
@@ -1133,7 +1075,6 @@ async function respSave(id){
   }catch(e){noteEl('resp-nt','err','Save failed: '+e.message);btnEl('resp-save',false,'Confirm & add');}
 }
 
-// ── Invites ──
 async function createInvite(){
   const label=val('inv-lbl')||'Unnamed invite';
   const token=Array.from(crypto.getRandomValues(new Uint8Array(8))).map(b=>b.toString(16).padStart(2,'0')).join('');
@@ -1148,7 +1089,6 @@ function renderInvites(){
 }
 function cpUrl(url,id){navigator.clipboard.writeText(url).then(()=>{const b=$(id);b.textContent='Copied ✓';b.classList.add('done');setTimeout(()=>{b.textContent='Copy';b.classList.remove('done');},2000);});}
 
-// ── Insights ──
 function renderInsights(){
   const people=Object.values(STATE.people);const places={},jobs={},surn={},dec={};
   people.forEach(p=>{
@@ -1163,7 +1103,6 @@ function renderInsights(){
   $('c-grid').innerHTML=bar('Birthplaces',places,'var(--ac)')+bar('Occupations',jobs,'var(--gn)')+bar('Surnames',surn,'var(--ml)')+bar('Birth decades',dec,'var(--fm)');
 }
 
-// ── Connections ──
 function fillSelects(){
   const people=Object.values(STATE.people);const opts=people.map(p=>`<option value="${p.id}">${esc(p.full_name)}</option>`).join('');
   ['sel-a','sel-b'].forEach(id=>{const el=$(id);const prev=el.value;el.innerHTML=opts||'<option>—</option>';if(prev)el.value=prev;});
@@ -1180,7 +1119,6 @@ function findConn(){
   $('conn-res').innerHTML=`<div class="card"><div class="cb"><div class="cbadge">${esc(label)}</div><div class="path">${ph}</div><div class="cexpl">${expl}</div></div></div>`;
 }
 
-// ── Settings ──
 function renderProviders(){
   const map={groq:'Groq',gemini:'Gemini',openai:'OpenAI',anthropic:'Anthropic',none:'No AI'};
   document.querySelectorAll('.pb').forEach(b=>b.classList.toggle('on',b.textContent.includes(map[STATE.aiProvider]||'###')));
@@ -1196,12 +1134,11 @@ async function testAI(){
   catch(e){el.textContent='✕ '+String(e.message).slice(0,50);el.style.color='var(--rd)';}
 }
 
-// ── Respondent (invite link flow) ──
 async function initRespond(token){
   show('scr-respond');
   $('rsp-fields').innerHTML=
-    `<div><div class="qt" style="margin-bottom:3px">Your full name</div><input class="in resp-name" placeholder="e.g. Ramesh Kumar Tiwari"></div>
-     <div><div class="qt" style="margin-bottom:3px">Your relation to the person who invited you</div><input class="in resp-rel" placeholder="e.g. Uncle, cousin, brother"></div>`+
+    `<div><div class="qt" style="margin-bottom:3px">Your full name</div><input class="in resp-name" placeholder="e.g. Rajesh Tiwari"></div>
+     <div><div class="qt" style="margin-bottom:3px">Your relation to the person who invited you</div><input class="in resp-rel" placeholder="e.g. uncle, cousin, brother"></div>`+
     QUESTIONS.map(([id,q,ph])=>`<div><div class="qt" style="margin-bottom:3px">${q}</div><textarea class="in resp-fq" data-q="${id}" placeholder="${ph}"></textarea></div>`).join('');
   if(!configured()){return respFail('This link is not set up yet — the tree owner needs to add database details.');}
   try{
@@ -1225,21 +1162,19 @@ async function submitResponse(){
   }catch(e){noteEl('rsp-nt','err','Error saving: '+e.message);btnEl('rsp-sub',false,'Submit →');}
 }
 
-// ── Demo seed ──
 function seedDemo(){
-  const P=[['Harishankar Tiwari',1900,true,'male'],['Devki Devi',1905,true,'female'],['Shivram Tiwari',1930,true,'male'],['Savitri Devi',1935,false,'female'],['Suresh Tiwari',1957,false,'male'],['Sunita Tiwari',1960,false,'female'],['Ramesh Tiwari',1962,false,'male'],['Mahesh Tiwari',1967,false,'male'],['Ankit Tiwari',1991,false,'male'],['Satyam Tiwari',1996,false,'male'],['Shivani',1998,false,'female']];
+  const P=[['Phoolchandra Tiwari',1925,true,'male'],['Girjavati Devi',1930,true,'female'],['Bambeshwari Tiwari',1958,false,'male'],['Seema Tiwari',1962,false,'female'],['Satyam Tiwari',1992,false,'male'],['Shivam Tiwari',1994,false,'male'],['Shubham Tiwari',1996,false,'male'],['Rajesh Tiwari',1960,false,'male'],['Antima Tiwari',1964,false,'female'],['Suryam Tiwari',1990,false,'male'],['Akanksha Tiwari',1992,false,'female'],['Diksha Tiwari',1995,false,'female']];
   const ids={};
   const people=P.map(([n,y,d,g])=>{const id=crypto.randomUUID();ids[n]=id;return{id,created_at:new Date().toISOString(),full_name:n,birth_year:y,is_deceased:d,gender:g};});
-  const R=[['Harishankar Tiwari','Shivram Tiwari','PARENT_OF'],['Devki Devi','Shivram Tiwari','PARENT_OF'],['Harishankar Tiwari','Devki Devi','SPOUSE_OF'],['Shivram Tiwari','Suresh Tiwari','PARENT_OF'],['Shivram Tiwari','Ramesh Tiwari','PARENT_OF'],['Shivram Tiwari','Mahesh Tiwari','PARENT_OF'],['Savitri Devi','Suresh Tiwari','PARENT_OF'],['Savitri Devi','Ramesh Tiwari','PARENT_OF'],['Savitri Devi','Mahesh Tiwari','PARENT_OF'],['Shivram Tiwari','Savitri Devi','SPOUSE_OF'],['Suresh Tiwari','Sunita Tiwari','SPOUSE_OF'],['Suresh Tiwari','Satyam Tiwari','PARENT_OF'],['Sunita Tiwari','Satyam Tiwari','PARENT_OF'],['Ramesh Tiwari','Ankit Tiwari','PARENT_OF'],['Satyam Tiwari','Shivani','SPOUSE_OF']];
+  const R=[['Phoolchandra Tiwari','Bambeshwari Tiwari','PARENT_OF'],['Girjavati Devi','Bambeshwari Tiwari','PARENT_OF'],['Phoolchandra Tiwari','Rajesh Tiwari','PARENT_OF'],['Girjavati Devi','Rajesh Tiwari','PARENT_OF'],['Phoolchandra Tiwari','Girjavati Devi','SPOUSE_OF'],['Bambeshwari Tiwari','Satyam Tiwari','PARENT_OF'],['Seema Tiwari','Satyam Tiwari','PARENT_OF'],['Bambeshwari Tiwari','Shivam Tiwari','PARENT_OF'],['Seema Tiwari','Shivam Tiwari','PARENT_OF'],['Bambeshwari Tiwari','Shubham Tiwari','PARENT_OF'],['Seema Tiwari','Shubham Tiwari','PARENT_OF'],['Bambeshwari Tiwari','Seema Tiwari','SPOUSE_OF'],['Rajesh Tiwari','Antima Tiwari','SPOUSE_OF'],['Rajesh Tiwari','Suryam Tiwari','PARENT_OF'],['Antima Tiwari','Suryam Tiwari','PARENT_OF'],['Rajesh Tiwari','Akanksha Tiwari','PARENT_OF'],['Antima Tiwari','Akanksha Tiwari','PARENT_OF'],['Rajesh Tiwari','Diksha Tiwari','PARENT_OF'],['Antima Tiwari','Diksha Tiwari','PARENT_OF']];
   const rels=R.map(r=>({id:crypto.randomUUID(),created_at:new Date().toISOString(),from_id:ids[r[0]],to_id:ids[r[1]],type:r[2],label:''}));
   localStorage.setItem('ftd_people',JSON.stringify(people));localStorage.setItem('ftd_relationships',JSON.stringify(rels));localStorage.setItem('ftd_invites','[]');localStorage.setItem('ftd_interviews','[]');
 }
 
-// ── Utils ──
 function gc(p){const g=(p?.gender||'').toLowerCase();return g==='male'?'#3f7fa6':g==='female'?'#c25f88':'#9a9186';}
 function ini(n){return n?n.split(' ').map(w=>w[0]||'').join('').toUpperCase().slice(0,2):'?';}
 function norm(s){return(s||'').toLowerCase().replace(/[^a-z]/g,' ').replace(/\s+/g,' ').trim();}
-function esc(s){return s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'):'';} 
+function esc(s){return s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'):'';}
 function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));$(id).classList.add('on');}
 function setEl(id,v){const e=$(id);if(e)e.textContent=v;}
 function btnEl(id,d,t){const e=$(id);if(e){e.disabled=d;if(t)e.textContent=t;}}
