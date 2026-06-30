@@ -390,13 +390,6 @@ function loadCache(){ try{const c=JSON.parse(localStorage.getItem('ft_v3')||'{}'
 function showSyncBanner(){$('sync-banner').style.display='block';}
 function hideSyncBanner(){$('sync-banner').style.display='none';}
 
-(function(){
-  const tok=new URLSearchParams(location.search).get('invite');
-  loadAI();
-  if(tok) return initRespond(tok);
-  if(!configured()) return show('scr-setup');
-  startApp();
-})();
 function startDemo(){STATE.demo=true;seedDemo();startApp();}
 
 async function startApp(){
@@ -444,7 +437,7 @@ async function loadAll(){
     }
     STATE.pending=pending;
     normalizeRels(true);
-    saveCache();hideSyncBanner();refresh();
+    saveCache();hideSyncBanner();fitted=false;refresh();
   }catch(e){
     console.error('loadAll error:',e.message);
     if($('db-status'))$('db-status').textContent='⚠ '+e.message+' (showing cached data)';
@@ -603,8 +596,8 @@ function layout(){
       const scored=arr.map(id=>{
         const ps=par[id].map(p=>order[p]).filter(v=>v!=null);
         const cs=chi[id].map(c=>order[c]).filter(v=>v!=null);
-        const sp=spo[id].map(s=>order[s]).filter(v=>v!=null&&gen[s]===l);
-        const sb2=sib[id]?sib[id].map(s=>order[s]).filter(v=>v!=null&&gen[s]===l):[];
+        const sp=spo[id].filter(s=>gen[s]===l).map(s=>order[s]).filter(v=>v!=null);
+        const sb2=(sib[id]||[]).filter(s=>gen[s]===l).map(s=>order[s]).filter(v=>v!=null);
         const nb=[...ps,...cs,...sp,...sb2];
         return{id,sc:nb.length?avg(nb):order[id]};
       });
@@ -631,6 +624,13 @@ function layout(){
   return{pos,gen,par,chi,spo,CW,CH,GY,W:Math.max(maxX-minX,CW),H:Math.max(maxY,CH)};
 }
 
+function gridLayout(people){
+  const CW=128,CH=116,GX=28,GY=72,cols=Math.max(1,Math.ceil(Math.sqrt(people.length)));
+  const pos={},par={},chi={},spo={};
+  people.forEach((p,i)=>{pos[p.id]={x:(i%cols)*(CW+GX),y:Math.floor(i/cols)*(CH+GY)};par[p.id]=[];chi[p.id]=[];spo[p.id]=[];});
+  const rows=Math.ceil(people.length/cols);
+  return{pos,gen:{},par,chi,spo,CW,CH,GY,W:cols*(CW+GX),H:rows*(CH+GY)};
+}
 function buildTree(){
   const cv=$('tc'),svg=$('ts');
   Array.from(cv.children).forEach(c=>{if(c!==svg)c.remove();});svg.innerHTML='';
@@ -641,8 +641,8 @@ function buildTree(){
     d.innerHTML='<div style="font-size:38px;opacity:.22">🌳</div><div style="font-size:13px">No people yet — use "Add person" or "Load my starter family"</div>';
     cv.appendChild(d);applyT();return;
   }
-  let L;try{L=layout();}catch(e){console.error('Layout error:',e);applyT();return;}
-  if(!L){applyT();return;}
+  let L;try{L=layout();}catch(e){console.error('Layout error, using grid fallback:',e);L=gridLayout(people);}
+  if(!L){L=gridLayout(people);}
   const{pos,par,chi,spo,CW,CH,W,H}=L;
   const PAD=80;
   cv.style.width=(W+PAD*2)+'px';cv.style.height=(H+PAD*2)+'px';
@@ -1179,6 +1179,15 @@ function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.re
 function setEl(id,v){const e=$(id);if(e)e.textContent=v;}
 function btnEl(id,d,t){const e=$(id);if(e){e.disabled=d;if(t)e.textContent=t;}}
 function noteEl(id,type,msg){const e=$(id);e.className=`nt ${type} on`;e.textContent=msg;if(type==='ok')setTimeout(()=>e.classList.remove('on'),4500);}
+
+// ── BOOT (runs last, after every function & const above is defined) ──
+(function(){
+  const tok=new URLSearchParams(location.search).get('invite');
+  loadAI();
+  if(tok) return initRespond(tok);
+  if(!configured()) return show('scr-setup');
+  startApp();
+})();
 </script>
 </body>
 </html>
