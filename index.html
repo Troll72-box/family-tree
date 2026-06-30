@@ -389,6 +389,16 @@ function saveCache(){ if(STATE.demo)return; try{localStorage.setItem('ft_v3',JSO
 function loadCache(){ try{const c=JSON.parse(localStorage.getItem('ft_v3')||'{}');if(c.p&&Object.keys(c.p).length){STATE.people=c.p;STATE.rels=c.r||[];STATE.invites=c.i||[];return true;}}catch(e){} return false; }
 function showSyncBanner(){$('sync-banner').style.display='block';}
 function hideSyncBanner(){$('sync-banner').style.display='none';}
+function isDirty(){try{return localStorage.getItem('ft_dirty')==='1';}catch(e){return false;}}
+function markDirty(){try{localStorage.setItem('ft_dirty','1');}catch(e){}showSyncBanner();}
+function markClean(){try{localStorage.setItem('ft_dirty','0');}catch(e){}hideSyncBanner();}
+function updateBanner(){isDirty()?showSyncBanner():hideSyncBanner();}
+// Write to server; if it fails, remember locally so a reload won't wipe it.
+async function syncWrite(m,table,q,body){
+  if(STATE.demo)return true;
+  try{await sb(m,table,body||null,q||'');return true;}
+  catch(e){markDirty();return false;}
+}
 
 function startDemo(){STATE.demo=true;seedDemo();startApp();}
 
