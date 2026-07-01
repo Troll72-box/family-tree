@@ -392,7 +392,7 @@ function hideSyncBanner(){$('sync-banner').style.display='none';}
 function isDirty(){try{return localStorage.getItem('ft_dirty')==='1';}catch(e){return false;}}
 function markDirty(){try{localStorage.setItem('ft_dirty','1');}catch(e){}showSyncBanner();}
 function markClean(){try{localStorage.setItem('ft_dirty','0');}catch(e){}hideSyncBanner();}
-function updateBanner(){isDirty()?showSyncBanner():hideSyncBanner();}
+function updateBanner(){isDirty()?showSyncBanner():markClean();}
 // Write to server; if it fails, remember locally so a reload won't wipe it.
 async function syncWrite(m,table,q,body){
   if(STATE.demo)return true;
@@ -441,13 +441,19 @@ async function loadAll(){
       sbGet('invites','?select=*&order=created_at.desc'),
       sbGet('interviews','?select=*&status=eq.pending&order=created_at.desc'),
     ]);
-    if(people.length>0||Object.keys(STATE.people).length===0){
-      STATE.people={};people.forEach(p=>STATE.people[p.id]=p);
-      STATE.rels=rels;STATE.invites=invites;
+    const sP={};people.forEach(p=>sP[p.id]=p);
+    if(isDirty()&&Object.keys(STATE.people).length){
+      // unsynced local edits exist → keep local as source of truth, add server rows we lack
+      Object.values(sP).forEach(p=>{if(!STATE.people[p.id])STATE.people[p.id]=p;});
+      const have=new Set(STATE.rels.map(r=>r.id));
+      rels.forEach(r=>{if(!have.has(r.id))STATE.rels.push(r);});
+      if(invites.length)STATE.invites=invites;
+    }else{
+      STATE.people=sP;STATE.rels=rels;STATE.invites=invites;
     }
     STATE.pending=pending;
     normalizeRels(true);
-    saveCache();hideSyncBanner();fitted=false;refresh();
+    saveCache();fitted=false;refresh();
   }catch(e){
     console.error('loadAll error:',e.message);
     if($('db-status'))$('db-status').textContent='⚠ '+e.message+' (showing cached data)';
@@ -460,6 +466,7 @@ function refresh(){
   $('resp-dot').textContent=STATE.pending.length?`(${STATE.pending.length})`:'';
   renderSide();buildTree();renderInvites();renderResponses();renderInsights();fillSelects();
   if(editingId&&STATE.people[editingId])renderProfile(editingId,editMode);
+  updateBanner();
 }
 function nav(name,btn){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
@@ -508,9 +515,17 @@ function normalizeRels(silent){
       const group=[...sibAdj[a]].filter(id=>STATE.people[id]);
       group.forEach(b=>{(sibAdj[b]||new Set()).forEach(c=>{if(c!==a&&STATE.people[c]){const e=pushRel(a,c,'SIBLING_OF','sibling of');if(e){added.push(e);changed=true;}}});});
     });
+    // siblings with NO parents inherit a sibling's parents (so they group under them)
+    const parOf={};
+    STATE.rels.forEach(r=>{if(isType(r,'PARENT')){(parOf[r.to_id]=parOf[r.to_id]||new Set()).add(r.from_id);}});
+    Object.keys(sibAdj).forEach(a=>{
+      const ap=parOf[a];if(!ap||!ap.size)return;
+      sibAdj[a].forEach(b=>{if(!STATE.people[b]||(parOf[b]&&parOf[b].size))return;
+        ap.forEach(p=>{const e=pushRel(p,b,'PARENT_OF','parent of');if(e){added.push(e);changed=true;}});});
+    });
     if(!changed)break;
   }
-  if(!silent&&!STATE.demo&&added.length)added.forEach(e=>sbPost('relationships',e).catch(()=>{showSyncBanner();}));
+  if(!silent&&!STATE.demo&&added.length)added.forEach(e=>sbPost('relationships',e).catch(()=>{markDirty();}));
   if(added.length)saveCache();
   return added.length;
 }
@@ -600,33 +615,44 @@ function layout(){
   const rows={};people.forEach(p=>{(rows[gen[p.id]]=rows[gen[p.id]]||[]).push(p.id);});
   const levels=Object.keys(rows).map(Number).sort((a,b)=>a-b);
   const order={};levels.forEach(l=>rows[l].forEach((id,i)=>order[id]=i));
-  for(let pass=0;pass<12;pass++){
+  // sibling connected-components → siblings always stay contiguous as one block
+  const comp={};let cc=0;
+  people.forEach(p=>{if(comp[p.id]!=null)return;const c=cc++;const q=[p.id];comp[p.id]=c;
+    while(q.length){const u=q.shift();(sib[u]||[]).forEach(v=>{if(comp[v]==null&&STATE.people[v]){comp[v]=c;q.push(v);}});}});
+  const gkey=id=>'c'+comp[id];
+  const hasFam=id=>((par[id]&&par[id].length)||(sib[id]&&sib[id].length));
+  for(let pass=0;pass<16;pass++){
     levels.forEach(l=>{
-      const arr=rows[l];
-      const scored=arr.map(id=>{
+      const score={};
+      rows[l].forEach(id=>{
         const ps=par[id].map(p=>order[p]).filter(v=>v!=null);
         const cs=chi[id].map(c=>order[c]).filter(v=>v!=null);
-        const sp=spo[id].filter(s=>gen[s]===l).map(s=>order[s]).filter(v=>v!=null);
-        const sb2=(sib[id]||[]).filter(s=>gen[s]===l).map(s=>order[s]).filter(v=>v!=null);
-        const nb=[...ps,...cs,...sp,...sb2];
-        return{id,sc:nb.length?avg(nb):order[id]};
+        score[id]=ps.length?avg(ps):(cs.length?avg(cs):order[id]);
       });
-      scored.sort((a,b)=>a.sc-b.sc||(order[a.id]-order[b.id]));
-      const out=[],done=new Set();
-      scored.forEach(({id})=>{
-        if(done.has(id))return;out.push(id);done.add(id);
-        spo[id].filter(s=>gen[s]===l&&!done.has(s)).forEach(s=>{out.push(s);done.add(s);});
-      });
+      const groups={},gord=[];
+      rows[l].forEach(id=>{const k=gkey(id);if(!groups[k]){groups[k]=[];gord.push(k);}groups[k].push(id);});
+      const gsc={};gord.forEach(k=>gsc[k]=avg(groups[k].map(id=>score[id])));
+      gord.sort((a,b)=>gsc[a]-gsc[b]);
+      const out=[];
+      gord.forEach(k=>groups[k].sort((a,b)=>score[a]-score[b]).forEach(id=>out.push(id)));
       rows[l]=out;out.forEach((id,i)=>order[id]=i);
     });
   }
+  // pull married-in spouses (no bloodline family shown) next to their partner
+  levels.forEach(l=>{
+    const out=[],done=new Set();
+    rows[l].forEach(id=>{if(done.has(id))return;out.push(id);done.add(id);
+      spo[id].forEach(sp=>{if(gen[sp]===l&&!done.has(sp)&&!hasFam(sp)){out.push(sp);done.add(sp);}});});
+    rows[l].forEach(id=>{if(!done.has(id)){out.push(id);done.add(id);}});
+    rows[l]=out;out.forEach((id,i)=>order[id]=i);
+  });
   const CW=128,CH=116,GX=28,GY=72,STEP=CW+GX;
   const x={};levels.forEach(l=>rows[l].forEach((id,i)=>x[id]=i*STEP));
-  const resolve=l=>{const a=[...rows[l]].sort((p,q)=>x[p]-x[q]);for(let i=1;i<a.length;i++){if(x[a[i]]<x[a[i-1]]+STEP)x[a[i]]=x[a[i-1]]+STEP;}};
-  for(let r=0;r<10;r++){
-    levels.forEach(l=>{rows[l].forEach(id=>{const ps=par[id].filter(p=>idset.has(p));if(ps.length)x[id]=avg(ps.map(p=>x[p]));});resolve(l);});
+  // resolve keeps the fixed ORDER (never re-sorts) so sibling blocks stay intact
+  const resolve=l=>{const a=rows[l];for(let i=1;i<a.length;i++){if(x[a[i]]<x[a[i-1]]+STEP)x[a[i]]=x[a[i-1]]+STEP;}};
+  for(let r=0;r<18;r++){
     [...levels].reverse().forEach(l=>{rows[l].forEach(id=>{const cs=chi[id].filter(c=>idset.has(c));if(cs.length)x[id]=avg(cs.map(c=>x[c]));});resolve(l);});
-    levels.forEach(l=>{rows[l].forEach(id=>{const ss=spo[id].filter(s=>gen[s]===l&&idset.has(s));if(ss.length){const m=avg([id,...ss].map(s=>x[s]));x[id]=m;ss.forEach(s=>x[s]=m);}});resolve(l);});
+    levels.forEach(l=>{rows[l].forEach(id=>{const ps=par[id].filter(p=>idset.has(p));if(ps.length)x[id]=avg(ps.map(p=>x[p]));});resolve(l);});
   }
   const pos={};let minX=Infinity,maxX=-Infinity,maxY=0;
   people.forEach(p=>{const px=x[p.id]||0,py=gen[p.id]*(CH+GY);pos[p.id]={x:px,y:py};minX=Math.min(minX,px);maxX=Math.max(maxX,px+CW);maxY=Math.max(maxY,py+CH);});
@@ -824,9 +850,9 @@ async function saveFields(id){
     is_deceased:$('ef-dc').checked
   };
   STATE.people[id]={...p,...upd};
-  saveCache();fitted=true;refresh();ppSt('Saving…');
-  try{await sbPatch('people',`?id=eq.${id}`,upd);ppSt('Saved ✓','var(--gn)');hideSyncBanner();}
-  catch(e){ppSt('⚠ Saved on device, not server: '+e.message.slice(0,35),'var(--rd)');showSyncBanner();}
+  saveCache();fitted=true;editMode=false;refresh();
+  const ok=await syncWrite('PATCH','people',`?id=eq.${id}`,upd);
+  if(ok)markClean();else markDirty();
 }
 async function setRel(relId,me,other,kind){
   const edge=kindEdge(kind,me,other);const newId=crypto.randomUUID();
@@ -839,7 +865,7 @@ async function setRel(relId,me,other,kind){
     await sbPost('relationships',{id:newId,...edge});
     normalizeRels(false);
     ppSt('Updated ✓','var(--gn)');hideSyncBanner();
-  }catch(e){ppSt('⚠ Not synced: '+e.message.slice(0,35),'var(--rd)');showSyncBanner();}
+  }catch(e){ppSt('⚠ Not synced: '+e.message.slice(0,35),'var(--rd)');markDirty();}
 }
 async function addRel(me){
   const other=$('ef-np')?.value,kind=$('ef-nk')?.value||'parent';
@@ -849,20 +875,20 @@ async function addRel(me){
   const newId=crypto.randomUUID();STATE.rels.push({id:newId,...edge});
   normalizeRels(true);
   saveCache();fitted=true;refresh();ppSt('Saving…');
-  try{await sbPost('relationships',{id:newId,...edge});normalizeRels(false);ppSt('Linked ✓','var(--gn)');hideSyncBanner();}
-  catch(e){ppSt('⚠ Not synced: '+e.message.slice(0,35),'var(--rd)');showSyncBanner();}
+  try{await sbPost('relationships',{id:newId,...edge});normalizeRels(false);ppSt('Linked ✓','var(--gn)');markClean();}
+  catch(e){ppSt('⚠ Not synced: '+e.message.slice(0,35),'var(--rd)');markDirty();}
 }
 async function removeRel(relId,me){
   STATE.rels=STATE.rels.filter(r=>r.id!==relId);
   saveCache();fitted=true;refresh();ppSt('Saving…');
-  try{await sbDel('relationships',`?id=eq.${relId}`);ppSt('Removed ✓','var(--gn)');hideSyncBanner();}
-  catch(e){ppSt('⚠ Not synced: '+e.message.slice(0,35),'var(--rd)');showSyncBanner();}
+  try{await sbDel('relationships',`?id=eq.${relId}`);ppSt('Removed ✓','var(--gn)');markClean();}
+  catch(e){ppSt('⚠ Not synced: '+e.message.slice(0,35),'var(--rd)');markDirty();}
 }
 async function delPerson(id){
   if(!confirm('Delete this person and all their relationships?'))return;
   delete STATE.people[id];STATE.rels=STATE.rels.filter(r=>r.from_id!==id&&r.to_id!==id);
   closeProfile();saveCache();refresh();
-  try{await sbDel('people',`?id=eq.${id}`);}catch(e){showSyncBanner();}
+  try{await sbDel('people',`?id=eq.${id}`);}catch(e){markDirty();}
 }
 async function wipeAll(){
   if(!confirm('Delete ALL people and relationships? This cannot be undone.'))return;
@@ -969,7 +995,7 @@ async function saveTree(res){
     if(relExists(f,t,type))continue;
     const e={id:crypto.randomUUID(),from_id:f,to_id:t,type,label:r.label||'',confidence:r.confidence||0.9};
     STATE.rels.push(e);
-    if(!STATE.demo)sbPost('relationships',e).catch(()=>{showSyncBanner();});
+    if(!STATE.demo)sbPost('relationships',e).catch(()=>{markDirty();});
   }
   normalizeRels(false);saveCache();
 }
@@ -1029,7 +1055,7 @@ async function seedMyFamily(){
     const ex=Object.values(STATE.people).find(p=>norm(p.full_name)===norm(name));
     if(ex){id[k]=ex.id;continue;}
     if(STATE.demo){const row={id:crypto.randomUUID(),full_name:name,gender:g};STATE.people[row.id]=row;id[k]=row.id;}
-    else{try{const rows=await sbPost('people',{full_name:name,gender:g,source:'seed'});STATE.people[rows[0].id]=rows[0];id[k]=rows[0].id;}catch(e){const row={id:crypto.randomUUID(),full_name:name,gender:g};STATE.people[row.id]=row;id[k]=row.id;showSyncBanner();}}
+    else{try{const rows=await sbPost('people',{full_name:name,gender:g,source:'seed'});STATE.people[rows[0].id]=rows[0];id[k]=rows[0].id;}catch(e){const row={id:crypto.randomUUID(),full_name:name,gender:g};STATE.people[row.id]=row;id[k]=row.id;markDirty();}}
   }
   const E=[
     [id.phool,id.bamb,'PARENT_OF'],[id.girja,id.bamb,'PARENT_OF'],
@@ -1048,7 +1074,7 @@ async function seedMyFamily(){
     if(!f||!t||relExists(f,t,type))continue;
     const e={id:crypto.randomUUID(),from_id:f,to_id:t,type,label:'',confidence:1};
     STATE.rels.push(e);
-    if(!STATE.demo)sbPost('relationships',e).catch(()=>{showSyncBanner();});
+    if(!STATE.demo)sbPost('relationships',e).catch(()=>{markDirty();});
   }
   normalizeRels(false);
   fitted=false;saveCache();refresh();
